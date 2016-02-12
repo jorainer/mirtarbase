@@ -16,7 +16,7 @@ mirtarbaseDb <- function(x){
     lite <- dbDriver("SQLite")
     con <- dbConnect(lite, dbname=x, flags=SQLITE_RO)
     tables <- dbListTables(con)
-    ## read the attributes for these tables.
+    ## read the columns for these tables.
     Tables <- vector(length=length(tables), "list")
     for(i in 1:length(Tables)){
         Tables[[ i ]] <- colnames(dbGetQuery(con, paste0("select * from ",
@@ -46,20 +46,20 @@ mirtarbaseDb <- function(x){
 ## builds the query that we use to retrieve the data.
 ## x is the MirtarbaseDb object.
 ## filter is a list of filters.
-## attrs: attributes to retrieve
+## columns: columns to retrieve
 ## order.by
-.buildQuery <- function(x, attrs=listAttributes(x), filter, order.by="",
+.buildQuery <- function(x, columns=listColumns(x), filter, order.by="",
                         order.type="asc", match.case=FALSE, force=FALSE){
-    resultattrs <- attrs
+    resultcolumns <- columns
     collatequery <- ""
     if(!missing(filter)){
         ## check filter!
         if(class(filter)!="list")
             stop("parameter filter has to be a list of BasicFilter classes!")
-        ## add the attributes needed for the filter
-        filterattrs <- unlist(lapply(filter, attribute, x))
-        ##filterattrs <- sapply(filterattrs, removePrefix, USE.NAMES=FALSE)
-        attrs <- unique(c(attrs, filterattrs))
+        ## add the columns needed for the filter
+        filtercolumns <- unlist(lapply(filter, column, x))
+        ##filtercolumns <- sapply(filtercolumns, removePrefix, USE.NAMES=FALSE)
+        columns <- unique(c(columns, filtercolumns))
         ## next we're building the where query.
         wheres <- lapply(filter, where, x)
         ## what if we've got any filter returning NULL in where?
@@ -81,13 +81,13 @@ mirtarbaseDb <- function(x){
     if(!missing(order.by) & order.by!=""){
         order.by <- unlist(strsplit(order.by, split=",", fixed=TRUE))
         order.by <- gsub(order.by, pattern=" ", replacement="", fixed=TRUE)
-        ## allow only order.by that are also in the attributes.
-        order.by.noattrs <- order.by[ !(order.by %in% attrs) ]
-        order.by <- order.by[ order.by %in% attrs ]
-        if(length(order.by.noattrs) > 0){
-            warning("attributes provided in order.by (",
-                    paste(order.by.noattrs, collapse=","),
-                    ") are not in attributes and were thus removed." )
+        ## allow only order.by that are also in the columns.
+        order.by.nocolumns <- order.by[ !(order.by %in% columns) ]
+        order.by <- order.by[ order.by %in% columns ]
+        if(length(order.by.nocolumns) > 0){
+            warning("columns provided in order.by (",
+                    paste(order.by.nocolumns, collapse=","),
+                    ") are not in columns and were thus removed." )
         }
         if(length(order.by)==0){
             order.by <- ""
@@ -104,9 +104,9 @@ mirtarbaseDb <- function(x){
         orderquery <- ""
     }
     ## now build the join query that joins all required tables.
-    joinquery <- joinQueryOnAttributes(x, attrs=attrs)
+    joinquery <- joinQueryOnColumns(x, columns=columns)
     finalquery <- paste0("select distinct ",
-                         paste(resultattrs, collapse=","),
+                         paste(resultcolumns, collapse=","),
                          " from ",
                          joinquery,
                          wherequery,
@@ -115,16 +115,16 @@ mirtarbaseDb <- function(x){
     return(finalquery)
 }
 
-.getWhat <- function(x, attrs=listAttributes(x), filter, order.by="",
+.getWhat <- function(x, columns=listColumns(x), filter, order.by="",
                      order.type="asc", match.case=FALSE, force=FALSE){
-    Q <- .buildQuery(x, attrs=attrs, filter=filter, order.by=order.by,
+    Q <- .buildQuery(x, columns=columns, filter=filter, order.by=order.by,
                      order.type=order.type, match.case=match.case, force=force)
     return(dbGetQuery(dbconn(x), Q))
 }
 
 
 ## No need to join tables, as in its present form the database is a single-table database
-joinQueryOnAttributes <- function(x, attrs, join, start.table){
+joinQueryOnColumns <- function(x, columns, join, start.table){
     return("mirtarbase")
 }
 

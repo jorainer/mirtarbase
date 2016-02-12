@@ -9,22 +9,22 @@ import(S4Vectors)
 importFrom(parallel, mclapply)
 importClassesFrom(ensembldb, BasicFilter, GenenameFilter, EntrezidFilter)  ## filters
 importFrom(ensembldb, GenenameFilter, EntrezidFilter)
-importMethodsFrom(ensembldb, attribute, where, connection, listAttributes,
+importMethodsFrom(ensembldb, where, listColumns,
                   listTables, condition)
 importClassesFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
                   MatmirnaidFilter, MirfamFilter, MirfamidFilter)  ## filters
 importFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
            MatmirnaidFilter, MirfamFilter, MirfamidFilter)
-importMethodsFrom(mirhostgenes, attribute, where)
+importMethodsFrom(mirhostgenes, where, column)
 importFrom(DBI, dbDriver)
 
-export("Report")
+export("MTIReport")
 export("MTI")
 ## classes:
-exportClasses(MirtarbaseDb, Report, MTI, ExperimentFilter, PublicationFilter,
+exportClasses(MirtarbaseDb, MTIReport, MTI, ExperimentFilter, PublicationFilter,
               SpeciesFilter, SupportTypeFilter, MTIList)
 ## methods for MirtarbaseDb:
-exportMethods(dbconn, show, listAttributes, listExperiments, listPmids,
+exportMethods(dbconn, show, listColumns, column, listExperiments, listPmids,
               listSpecies, listSupportTypes, mtis, mtisBy, show, listTables, version)
 ## methods for MTI and Report classes
 exportMethods(as.data.frame, entrezid, experiments, gene, geneSpecies,

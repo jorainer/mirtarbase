@@ -143,7 +143,7 @@ data.frame2mtiNreport <- function(x, colname.pmid="references_pmid",
 row2report <- function(x, name.pmid="references_pmid", name.support="support_type",
                        name.experiments="experiments", split="//"){
     ## here we do not check again for available data etc.
-    Rp <- Report(pmid=as.numeric(x[ name.pmid ]),
+    Rp <- MTIReport(pmid=as.numeric(x[ name.pmid ]),
                  support_type=x[ name.support ],
                  experiments=unique(unlist(strsplit(x[ name.experiments ], split=split)))
                 )

@@ -1,3 +1,16 @@
+VERSION 0.99.1
+--------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+    o Renamed "Report" class into "MTIReport" class.
+    o Renamed attribute method to column.
+    o Renamed listAttributes method to listColumns
+
+BUG FIXES
+    o Fixed RUnit tests
+    o Fixed examples in help pages.
+
+
 VERSION 0.99.0
 --------------
 

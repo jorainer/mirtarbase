@@ -2,10 +2,10 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{MirtarbaseDb-class}
-\alias{connection}
-\alias{connection,MirtarbaseDb-method}
-\alias{listAttributes}
-\alias{listAttributes,MirtarbaseDb-method}
+\alias{dbconn}
+\alias{dbconn,MirtarbaseDb-method}
+\alias{listColumns}
+\alias{listColumns,MirtarbaseDb-method}
 \alias{listExperiments}
 \alias{listExperiments,MirtarbaseDb-method}
 \alias{listPmids}
@@ -20,8 +20,8 @@
 \alias{mtisBy,MirtarbaseDb-method}
 \alias{show}
 \alias{show,MirtarbaseDb-method}
-\alias{tables}
-\alias{tables,MirtarbaseDb-method}
+\alias{listTables}
+\alias{listTables,MirtarbaseDb-method}
 \alias{version}
 \alias{version,MirtarbaseDb-method}
 
@@ -31,34 +31,34 @@
   the miRTarbase database.
 }
 \section{Objects from the Class}{
-  The \code{MirtarbaseDb} object providing the connection to the
+  The \code{MirtarbaseDb} object providing the dbconn to the
   respective MTI database is created upon loading of the package and is
   associated with the \code{mirtarbase} variable.
   See examples below for usage.
 }
 \usage{
 
-\S4method{connection}{MirtarbaseDb}(x, ... )
+\S4method{dbconn}{MirtarbaseDb}(x, ...)
 
-\S4method{listAttributes}{MirtarbaseDb}(x, table, skip.keys=TRUE, ... )
+\S4method{listColumns}{MirtarbaseDb}(x, table, skip.keys=TRUE, ...)
 
-\S4method{listExperiments}{MirtarbaseDb}( x, ... )
+\S4method{listExperiments}{MirtarbaseDb}(x, ...)
 
-\S4method{listPmids}{MirtarbaseDb}( x, ... )
+\S4method{listPmids}{MirtarbaseDb}(x, ...)
 
-\S4method{listSpecies}{MirtarbaseDb}( x, of="gene", ... )
+\S4method{listSpecies}{MirtarbaseDb}(x, of="gene", ...)
 
-\S4method{listSupportTypes}{MirtarbaseDb}( x, ... )
+\S4method{listSupportTypes}{MirtarbaseDb}(x, ...)
 
-\S4method{mtis}{MirtarbaseDb}( x, attrs=listAttributes( x, "mirtarbase"
+\S4method{mtis}{MirtarbaseDb}(x, attrs=listColumns(x, "mirtarbase"
 ), filter, order.by="mirtarbase_id", order.type="asc",
-return.type="MTIList", force=FALSE )
+return.type="MTIList", force=FALSE)
 
-\S4method{mtisBy}{MirtarbaseDb}( x, by="gene", filter )
+\S4method{mtisBy}{MirtarbaseDb}(x, by="gene", filter)
 
-\S4method{tables}{MirtarbaseDb}( x, ... )
+\S4method{listTables}{MirtarbaseDb}(x, ...)
 
-\S4method{version}{MirtarbaseDb}( object, ... )
+\S4method{version}{MirtarbaseDb}(object, ...)
 
 }
 \arguments{
@@ -70,7 +70,7 @@ return.type="MTIList", force=FALSE )
   \item{attrs}{
     Character vector of attribute names to be returned from the
     database. For a complete list of allowed attributes use the
-    \code{\link{listAttributes}} method.
+    \code{\link{listColumns}} method.
   }
 
   \item{by}{
@@ -124,12 +124,12 @@ return.type="MTIList", force=FALSE )
   }
 
   \item{skip.keys}{
-    For \code{listAttributes}: whether primary and foreign keys should be
+    For \code{listColumns}: whether primary and foreign keys should be
     returned.
   }
 
   \item{table}{
-    For \code{listAttributes}: specify the database table name for which
+    For \code{listColumns}: specify the database table name for which
     the attributes should be listed.
   }
 
@@ -141,8 +141,8 @@ return.type="MTIList", force=FALSE )
 \section{Slots}{
   \describe{
     \item{\code{con}:}{
-      Object of class \code{"DBIConnection"}: the
-      connection to the database.
+      Object of class \code{"DBIDbconn"}: the
+      dbconn to the database.
     }
 
     \item{\code{mirtarbase_date}:}{
@@ -179,11 +179,11 @@ return.type="MTIList", force=FALSE )
 \section{Methods and Functions}{
   \describe{
 
-    \item{connection}{returns connection
+    \item{dbconn}{returns dbconn
       to the internal SQL database.
     }
 
-    \item{listAttributes}{
+    \item{listColumns}{
       Returns a character vector of all attributes stored in a database,
       or in a single database table if \code{table} was specified.
     }
@@ -234,7 +234,7 @@ return.type="MTIList", force=FALSE )
       displays some informations from the database.
     }
 
-    \item{tables}{
+    \item{listTables}{
       returns a named list of database table attributes (names of the
       list being the database table names).
     }
@@ -258,28 +258,28 @@ return.type="MTIList", force=FALSE )
 mirtarbase
 
 ## version
-version( mirtarbase )
+version(mirtarbase)
 
 ## what attributes do we have?
-listAttributes( mirtarbase )
+listColumns(mirtarbase)
 
 ## what tables
-tables( mirtarbase )
+listTables(mirtarbase)
 
 ## list all species for target genes
-listSpecies( mirtarbase, "gene" )
+listSpecies(mirtarbase, "gene")
 
 ## list all species for miRNAs
-listSpecies( mirtarbase, "mirna" )
+listSpecies(mirtarbase, "mirna")
 
 ## list all MTI support types
-listSupportTypes( mirtarbase )
+listSupportTypes(mirtarbase)
 
 ## list all experiments
-listExperiments( mirtarbase )
+listExperiments(mirtarbase)
 
 ## perform a SQL query on the database.
-dbGetQuery( connection( mirtarbase ), "select * from mirtarbase limit 2" )
+dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase limit 2")
 
 
 ##******************************************
@@ -290,58 +290,58 @@ dbGetQuery( connection( mirtarbase ), "select * from mirtarbase limit 2" )
 ##
 ##******************************************
 ## get all MTIs for gene BCL2 and restrict to human.
-BCL2 <- mtis( mirtarbase, filter=list( GenenameFilter( "BCL2" ), SpeciesFilter( "Homo sapiens", feature="gene" ) ))
+BCL2 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"), SpeciesFilter("Homo sapiens", feature="gene")))
 
 ## for how many miRNAs there is evidence that they target this gene?
-length( BCL2 )
+length(BCL2)
 
 BCL2
 ## just looking at the first
 BCL2[[1]]
 
 ## what evidences are there for the interaction?
-table( unlist( supportedBy( BCL2 ) ) )
+table(unlist(supportedBy(BCL2)))
 
 ## which pre-miRNAs are these?
-pres <- premirna( BCL2 )
-BCL2[ which( is.na( pres ) ) ]
+pres <- premirna(BCL2)
+BCL2[ which(is.na(pres)) ]
 ## well, some of the mature miRNAs can not be mapped to pre-miRNAs, because
 ## the mirbase version between the mirbase.db and the miRTarbase does not
 ## match.
 
 ## is there any "enrichment" for a specific miRNA family?
-sort( table( mirfam( BCL2 ) ), decreasing=TRUE )
+sort(table(mirfam(BCL2)), decreasing=TRUE)
 
 ## we could also use the lapply to apply the mirfam method to each
 ## individual MTI object.
-sort( table( unlist( lapply( BCL2, mirfam ) ) ), decreasing=TRUE )
+sort(table(unlist(lapply(BCL2, mirfam))), decreasing=TRUE)
 
 ## now we perform the same query as above, but ask for a data.frame as
 ## return type.
-BCL2.df <- mtis( mirtarbase, filter=list( GenenameFilter( "BCL2" ), SpeciesFilter( "Homo sapiens", feature="gene" ) ), return.type="data.frame")
+BCL2.df <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"), SpeciesFilter("Homo sapiens", feature="gene")), return.type="data.frame")
 
 ## the query is much faster, but:
-nrow( BCL2.df )
-length( BCL2 )
+nrow(BCL2.df)
+length(BCL2)
 ## we get almost twice as many rows: one row in the data.frame corresponds to one
 ## publication in which a miRNA target gene interaction was detected, while each
 ## element in the list corresponds to one MTI class with the list of Report objects
 ## (i.e. publications) being stored in the report slot.
 
 ## get all MTIs for a specific miRNA
-Test <- mtis( mirtarbase, filter=list( PremirnaFilter( c( "hsa-mir-223" ) ), SpeciesFilter( "Homo sapiens" ) ) )
-length( Test )
+Test <- mtis(mirtarbase, filter=list(PremirnaFilter(c("hsa-mir-223")), SpeciesFilter("Homo sapiens")))
+length(Test)
 ## get the gene names along with the number of supporting evidences
-data.frame( gene=gene( Test ), report_count=reportCount( Test ) )
+data.frame(gene=gene(Test), report_count=reportCount(Test))
 
 
 ## get all MTIs for a miRNA family.
-MTIs <- mtis( mirtarbase, filter=list( MirfamFilter( "mir-15" ), SpeciesFilter( "Homo sapiens" ) ) )
-length( MTIs )
+MTIs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"), SpeciesFilter("Homo sapiens")))
+length(MTIs)
 MTIs
 ## next we might want to ask if there are genes targeted by more than one miRNA
 ## of this family.
-head( sort( table( gene( MTIs ) ), decreasing=TRUE ) )
+head(sort(table(gene(MTIs)), decreasing=TRUE))
 
 
 }

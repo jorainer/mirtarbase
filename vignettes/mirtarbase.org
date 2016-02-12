@@ -30,7 +30,7 @@ vignette: >
   %\VignetteIndexEntry{mirtarbase: a database of validated miRNA target gene interactions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{mirtarbase,BiocStyle}
+  %\VignetteDepends{BiocStyle,mirtarbase}
   %\VignettePackage{mirtarbase}
   %\VignetteKeywords{annotation,database,miRNA}
 bibliography: references.bib
@@ -99,7 +99,7 @@ verified along with the support type (i.e. one of four evidence grades that was
 defined by the developers), the experiments supporting the interaction and the
 Pubmed ID. This information is stored internally in a SQLite database (see
 Section [[section.database.layout]] for the layout of the database and the
-attributes).
+attributes/columns).
 
 Before we start with some usage scenarios for the package it is important to
 understand the mechanism to fetch specific values from the database, i.e. how
@@ -247,8 +247,8 @@ encoded and the miRNA family to which the pre-miRNA(s) belong.
 ** Get miRNA-target gene interactions for a miRNA
 
 Next we retrieve MTIs between miRNAs of the mir-15 family and genes which names
-start with /BCL2/. For this we define a =GenenameFilter= specifying
-=condition="like"=.
+start with /BCL2/. For this we define a =GenenameFilter= with ="like"= as
+condition and a pattern for the gene name.
 
 #+BEGIN_SRC R
   ## get all miRNA-target gene interactions betwee mature miRNAs from the
@@ -264,8 +264,21 @@ According to this information the miRNA /miR-195-5p/ targets both, a pro- and an
 anti-apoptotic member of the /BCL2/ gene family (/BCL2L11/ and /BCL2/,
 respectively).
 
+By default, the results are returned by the =mtis= method as =MTIList= object,
+but we could also specify ="data.frame"= as the =return.type= to retrieve the
+data as =data.frame=. This allows to retrieve only specific information from the
+database by specifying the columns that should be returned.
+
+#+BEGIN_SRC R
+  onlyGeneNames <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
+						GenenameFilter("BCL2%", condition="like"),
+						SpeciesFilter("Homo sapiens")),
+			columns=c("mirna", "target_gene"), return.type="data.frame")
+  head(onlyGeneNames)
+#+END_SRC
+
 Also members of the /mir-17/ family have been reported to target genes from the
-/BCL2/ gene family, thus we retrieve next all MTIs between miRNAs of the miRNA
+/BCL2/ gene family \cite{Ventura:2008gk}, thus we retrieve next all MTIs between miRNAs of the miRNA
 families /mir-15/ or /mir-17/ and some of the genes from the BCL2 gene family, a
 gene family involved in, and regulating, the intrinsic apoptotic pathway.
 
@@ -327,7 +340,7 @@ of reports per MTI.
 
 Sometimes it might be useful to group the miRNA-target gene interactions by some
 factor, e.g. by genes or miRNAs. The method =mtisBy= allows to fetch =MTIs=
-grouped by any attribute from the database. It is possible to group the results
+grouped by any column from the database. It is possible to group the results
 by gene, (mature miRNA), entrezid, support type, Pubmed ID, pre-miRNA name,
 miRFam name or by species. The result will be a =list= with the names being the
 factor by which the interactions are grouped and each element being a =MTIList=
@@ -358,23 +371,23 @@ In a similar way we can also fetch the data grouped by gene.
 By default, the =mtis= method returns a list of =MTI= objects (=MTIList=) which
 is sufficient for most use cases. Alternatively, however, the =mtis= method can
 also return the results as a =data.frame=. In addition to a significant
-performance improvement this also enables to select only specific attributes
+performance improvement this also enables to select only specific columns
 from the database. Note however that by default the method returns all
-attributes from the database which results in a =data.frame= with one
+columns from the database which results in a =data.frame= with one
 MTI-publication per row, i.e. the same MTI represented by the miRNA-gene pair
 can be present in many rows of this =data.frame= depending in how many
 publications this interaction was identified.
 
 #+BEGIN_SRC R
   ## We perform the same call as above, but restrict the information to some selected
-  ## attributes and specify to return the results as a data.frame rather than a list
+  ## columns and specify to return the results as a data.frame rather than a list
   ## of MTI objects.
   BCLs.df <- mtis(mirtarbase,
                   filter=list(MirfamFilter(c("mir-15", "mir-17")),
                       GenenameFilter(c("BCL2", "BCL2L11", "PMAIP1", "MCL1")),
                       SpeciesFilter("Homo sapiens"),
                       SupportTypeFilter("Functional MTI")),
-                  attrs=c("mirna", "target_gene"),
+                  columns=c("mirna", "target_gene"),
                   return.type="data.frame")
 
   BCLs.df
@@ -429,6 +442,21 @@ validated.
 + =references_pmid=: the Pubmed ID of the publication reporting the MTI. Each
   line with a single Pubmed ID, no empty (=NA=) values.
 
+
+* TODOs								   :noexport:
+
+** TODO Fix all documentation discrepancies.
+** TODO Why the heck don't I get /distinct/ results?
+
+A =mtis= with columns =mirna= and =target_gene= returns non-unique results... why?
+
+** TODO Warn if columns and return.type="data.frame".
+
+In that case =columns= is ignored.
+
+** TODO Update and fix help pages.
+** TODO Update and fix the vignette.
+** TODO Add/fix the copyright and license.
 
 * References
 

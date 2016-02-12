@@ -80,8 +80,7 @@ matmirna2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="d
 }
 
 ##
-pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
-                    mat="mature_name", return.type="data.frame"){
+pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", mat="mature_name", return.type="data.frame"){
     ## well, better to use SQL queries...
     ## straight forward way would be to use the get("hsa-mir-16-1", mirbaseMATURE)
     condition <- match.arg(condition, c("=", "!=", "in", "like", "not like"))

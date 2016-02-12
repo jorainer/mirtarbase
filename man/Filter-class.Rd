@@ -6,35 +6,35 @@
 \alias{SpeciesFilter-class}
 \alias{SupportTypeFilter-class}
 % defined in ensembldb
-\alias{attribute,EntrezidFilter,MirtarbaseDb-method}
+\alias{column,EntrezidFilter,MirtarbaseDb-method}
 \alias{where,EntrezidFilter,MirtarbaseDb-method}
-\alias{attribute,GenenameFilter,MirtarbaseDb-method}
+\alias{column,GenenameFilter,MirtarbaseDb-method}
 \alias{where,GenenameFilter,MirtarbaseDb-method}
 % defined in mirnahostgenes
-\alias{attribute,MatmirnaFilter,MirtarbaseDb-method}
+\alias{column,MatmirnaFilter,MirtarbaseDb-method}
 \alias{where,MatmirnaFilter,MirtarbaseDb-method}
-\alias{attribute,MatmirnaidFilter,MirtarbaseDb-method}
+\alias{column,MatmirnaidFilter,MirtarbaseDb-method}
 \alias{where,MatmirnaidFilter,MirtarbaseDb-method}
-\alias{attribute,MirfamFilter,MirtarbaseDb-method}
+\alias{column,MirfamFilter,MirtarbaseDb-method}
 \alias{where,MirfamFilter,MirtarbaseDb-method}
-\alias{attribute,MirfamidFilter,MirtarbaseDb-method}
+\alias{column,MirfamidFilter,MirtarbaseDb-method}
 \alias{where,MirfamidFilter,MirtarbaseDb-method}
-\alias{attribute,PremirnaFilter,MirtarbaseDb-method}
+\alias{column,PremirnaFilter,MirtarbaseDb-method}
 \alias{where,PremirnaFilter,MirtarbaseDb-method}
-\alias{attribute,PremirnaidFilter,MirtarbaseDb-method}
+\alias{column,PremirnaidFilter,MirtarbaseDb-method}
 \alias{where,PremirnaidFilter,MirtarbaseDb-method}
 % defined in mirtarbase
-\alias{attribute,ExperimentFilter,MirtarbaseDb-method}
-\alias{attribute,PublicationFilter,MirtarbaseDb-method}
-\alias{attribute,SpeciesFilter,MirtarbaseDb-method}
-\alias{attribute,SupportTypeFilter,MirtarbaseDb-method}
+\alias{column,ExperimentFilter,MirtarbaseDb-method}
+\alias{column,PublicationFilter,MirtarbaseDb-method}
+\alias{column,SpeciesFilter,MirtarbaseDb-method}
+\alias{column,SupportTypeFilter,MirtarbaseDb-method}
 \alias{where,ExperimentFilter,MirtarbaseDb-method}
 \alias{where,PublicationFilter,MirtarbaseDb-method}
 \alias{show,SpeciesFilter,MirtarbaseDb-method}
 \alias{show,SpeciesFilter-method}
 \alias{where,SpeciesFilter,MirtarbaseDb-method}
 \alias{where,SupportTypeFilter,MirtarbaseDb-method}
-\alias{attribute}
+\alias{column}
 \alias{where}
 
 \title{Filter results fetched from the miRTarbase database}
@@ -87,9 +87,9 @@ Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
 \section{Methods}{
   \describe{
 
-    \item{attribute}{
+    \item{column}{
       \code{signature(object = "ExperimentFilter", db = "MirtarbaseDb")}: returns
-      the attribute (table column name in the miRTarbase database)
+      the column (table column name in the miRTarbase database)
       to be used for the filtering. The method can be applied to any
       filter class defined in the \code{mirtarbase}, \code{mirnahostgenes} or
       \code{ensembldb} packages.
@@ -201,19 +201,19 @@ Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
 ## EntrezidFilter
 ##***********************
 ##
-EFilt <- EntrezidFilter( 123, condition="like" )
+EFilt <- EntrezidFilter(123, condition="like")
 EFilt
-## default attribute of the filter
-attribute( EFilt )
-## attribute of the filter for the mirtarbase package:
-attribute( EFilt, mirtarbase )
+## default column of the filter
+column(EFilt)
+## column of the filter for the mirtarbase package:
+column(EFilt, mirtarbase)
 ## and the where query:
-where( EFilt, mirtarbase )
+where(EFilt, mirtarbase)
 
 ## EntrezidFilter with more than one value:
-EFilt <- EntrezidFilter( c( 123, 3435 ) )
+EFilt <- EntrezidFilter(c(123, 3435))
 EFilt
-where( EFilt, mirtarbase )
+where(EFilt, mirtarbase)
 
 
 ##***********************
@@ -221,30 +221,30 @@ where( EFilt, mirtarbase )
 ## ExperimentFilter
 ##***********************
 ## create a simple experiment filter; this would return all entries that have "qpcr"
-## in the experiments attribute; like is case insensitive.
-EFilt <- ExperimentFilter( "PCR" )
-attribute( EFilt, mirtarbase )
-where( EFilt, mirtarbase )
+## in the experiments column; like is case insensitive.
+EFilt <- ExperimentFilter("PCR")
+column(EFilt, mirtarbase)
+where(EFilt, mirtarbase)
 
-EFilt <- ExperimentFilter( c( "PCR" ), condition="like" )
-where( EFilt, mirtarbase )
+EFilt <- ExperimentFilter(c("PCR"), condition="like")
+where(EFilt, mirtarbase)
 
 ## a good starting point is to list all experiments from the database
 ## and select the pattern from there
-listExperiments( mirtarbase )
+listExperiments(mirtarbase)
 
 ##***********************
 ##
 ## GenenameFilter
 ##***********************
 ## create a gene name filter
-GFilt <- GenenameFilter( "Bcl2l11", condition="!=" )
+GFilt <- GenenameFilter("Bcl2l11", condition="!=")
 GFilt
-## the attribute name in the ensembldb package
-attribute( GFilt )
+## the column name in the ensembldb package
+column(GFilt)
 ## and in the mirtarbase package
-attribute( GFilt, mirtarbase )
-where( GFilt, mirtarbase )
+column(GFilt, mirtarbase)
+where(GFilt, mirtarbase)
 
 
 ##***********************
@@ -252,11 +252,11 @@ where( GFilt, mirtarbase )
 ## MatmirnaFilter
 ##***********************
 ## mature miRNA filter
-MFilt <- MatmirnaFilter( c( "hsa-miR-16-5p", "hsa-miR-16-3p" ) )
+MFilt <- MatmirnaFilter(c("hsa-miR-16-5p", "hsa-miR-16-3p"))
 MFilt
 ## and in the mirtarbase package
-attribute( MFilt, mirtarbase )
-where( MFilt, mirtarbase )
+column(MFilt, mirtarbase)
+where(MFilt, mirtarbase)
 
 
 ##***********************
@@ -264,11 +264,11 @@ where( MFilt, mirtarbase )
 ## PublicationFilter
 ##***********************
 ## create a simple publication filter (on Pubmed IDs)
-PFilt <- PublicationFilter( 123 )
+PFilt <- PublicationFilter(123)
 PFilt
-## the attribute in the mirtarbase package
-attribute( PFilt, mirtarbase )
-where( PFilt, mirtarbase )
+## the column in the mirtarbase package
+column(PFilt, mirtarbase)
+where(PFilt, mirtarbase)
 
 
 ##***********************
@@ -276,27 +276,27 @@ where( PFilt, mirtarbase )
 ## SpeciesFilter
 ##***********************
 ## create a species filter on genes
-SFilt <- SpeciesFilter( "Homo sapiens", feature="gene" )
+SFilt <- SpeciesFilter("Homo sapiens", feature="gene")
 SFilt
-## the attribute for the gene
-attribute( SFilt, mirtarbase )
-where( SFilt, mirtarbase )
+## the column for the gene
+column(SFilt, mirtarbase)
+where(SFilt, mirtarbase)
 
 ## the same for miRNA
-SFilt <- SpeciesFilter( "Homo sapiens", feature="mirna" )
-## the attribute for miRNA
-attribute( SFilt, mirtarbase )
-where( SFilt, mirtarbase )
+SFilt <- SpeciesFilter("Homo sapiens", feature="mirna")
+## the column for miRNA
+column(SFilt, mirtarbase)
+where(SFilt, mirtarbase)
 
 ## what if we used a non-standard species?
-SFilt <- SpeciesFilter( "Homo hobbeniensis", feature="gene" )
+SFilt <- SpeciesFilter("Homo hobbeniensis", feature="gene")
 ## this throws a warning
 suppressWarnings(
-    where( SFilt, mirtarbase )
+    where(SFilt, mirtarbase)
 )
 ## obviously only values present in the database make sense:
-listSpecies( mirtarbase, "gene" )
-listSpecies( mirtarbase, "mirna" )
+listSpecies(mirtarbase, "gene")
+listSpecies(mirtarbase, "mirna")
 
 
 ##***********************
@@ -304,17 +304,17 @@ listSpecies( mirtarbase, "mirna" )
 ## SupportTypeFilter
 ##***********************
 ## create a filter on the mirtarbase support types
-SFilt <- SupportTypeFilter( "unknown" )
+SFilt <- SupportTypeFilter("unknown")
 SFilt
-## the attribute that will be queried
-attribute( SFilt, mirtarbase )
+## the column that will be queried
+column(SFilt, mirtarbase)
 ## throws a warning since the support type unknown is not present in the database
 suppressWarnings(
-    where( SFilt, mirtarbase )
-    )
+    where(SFilt, mirtarbase)
+   )
 
 ## better to select one of the correct support types:
-listSupportTypes( mirtarbase )
+listSupportTypes(mirtarbase)
 
 
 ##***********************
@@ -325,20 +325,20 @@ listSupportTypes( mirtarbase )
 ## Note that the PremirnaFilter methods for MirtarbaseDb internally map the pre-miRNA name
 ## to mature miRNA names based on the mirbase.db package, as the
 ## miRTarbase database does not provide pre-miRNA ids.
-PF <- PremirnaFilter( c( "bla", "hsa-mir-15b" ) )
+PF <- PremirnaFilter(c("bla", "hsa-mir-15b"))
 ## the where internally maps the pre-miRNA ID to the corresponding mature miRNA ID(s)
-where( PF, mirtarbase )
+where(PF, mirtarbase)
 
 ## what if nothing was found...
-PF <- PremirnaFilter( "baf" )
-where( PF, mirtarbase )
+PF <- PremirnaFilter("baf")
+where(PF, mirtarbase)
 ## returns nothing
 
-PF <- PremirnaFilter( c( "bla", "hsa-mir-15b" ), condition="!=" )
-where( PF, mirtarbase )
+PF <- PremirnaFilter(c("bla", "hsa-mir-15b"), condition="!=")
+where(PF, mirtarbase)
 
 ##
-PF <- PremirnaFilter( "hsa-mir-15b" )
+PF <- PremirnaFilter("hsa-mir-15b")
 where(PF , mirtarbase)
 
 
@@ -346,32 +346,32 @@ where(PF , mirtarbase)
 ##
 ## PremirnaidFilter
 ##***********************
-PF <- PremirnaidFilter( "MI0000070" )
-where( PF, mirtarbase )
+PF <- PremirnaidFilter("MI0000070")
+where(PF, mirtarbase)
 
 
 ##***********************
 ##
 ## MatmirnaidFilter
 ##***********************
-MF <- MatmirnaidFilter( "MIMAT0004489", "!=" )
-where( MF, mirtarbase )
+MF <- MatmirnaidFilter("MIMAT0004489", "!=")
+where(MF, mirtarbase)
 
 
 ##***********************
 ##
 ## MirfamFilter
 ##***********************
-MF <- MirfamFilter( "mir-15" )
-where( MF, mirtarbase )
+MF <- MirfamFilter("mir-15")
+where(MF, mirtarbase)
 
 
 ##***********************
 ##
 ## MirfamidFilter
 ##***********************
-MF <- MirfamidFilter( "MIPF0000006" )
-where( MF, mirtarbase )
+MF <- MirfamidFilter("MIPF0000006")
+where(MF, mirtarbase)
 
 
 }

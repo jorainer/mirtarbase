@@ -7,10 +7,10 @@ if(!isGeneric("as.data.frame")){
     setGeneric("as.data.frame", function(x, ...)
         standardGeneric("as.data.frame"))
 }
-if(!isGeneric("attribute")){
-    setGeneric("attribute", function(object, db, ...)
-        standardGeneric("attribute"))
-}
+## if(!isGeneric("attribute")){
+##     setGeneric("attribute", function(object, db, ...)
+##         standardGeneric("attribute"))
+## }
 ## if(!isGeneric("connection")){
 ##     setGeneric("connection", function(x, ...)
 ##         standardGeneric("connection"))
@@ -30,10 +30,10 @@ if(!isGeneric("geneSpecies"))
 if(!isGeneric("id"))
     setGeneric("id" , function(object, ...)
                standardGeneric("id"))
-if(!isGeneric("listAttributes")){
-    setGeneric("listAttributes", function(x, ...)
-        standardGeneric("listAttributes"))
-}
+## if(!isGeneric("listAttributes")){
+##     setGeneric("listAttributes", function(x, ...)
+##         standardGeneric("listAttributes"))
+## }
 if(!isGeneric("listExperiments")){
     setGeneric("listExperiments", function(x, ...)
         standardGeneric("listExperiments"))

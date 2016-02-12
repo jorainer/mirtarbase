@@ -35,7 +35,7 @@ setClass("MirtarbaseDb",
 ##
 ##***********************************************************************
 ## A report (i.e. publication) that reported the MTI.
-setClass("Report",
+setClass("MTIReport",
          representation(pmid="numeric",
                         experiments="character",
                         support_type="character"
@@ -45,11 +45,11 @@ setClass("Report",
                         support_type=""
                         )
          )
-Report <- function(pmid=0, support_type="", experiments=""){
+MTIReport <- function(pmid=0, support_type="", experiments=""){
     if(is.na(pmid)){
         return(NA)
     }
-    rep <- new("Report",
+    rep <- new("MTIReport",
                pmid=pmid,
                support_type=support_type,
                experiments=experiments)
@@ -73,7 +73,7 @@ setClass("MTI",
                         target_gene="",
                         target_gene_entrezid=0,
                         species_target_gene="",
-                        report=list(new("Report"))
+                        report=list(new("MTIReport"))
                         )
          )
 MTI <- function(id="", mature_mirna="", species_mirna="", query="", target_gene="",

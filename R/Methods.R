@@ -11,7 +11,7 @@ setMethod("dbconn", "MirtarbaseDb", function(x){
     return(con)
 })
 
-setMethod("listAttributes", "MirtarbaseDb", function(x, table, skip.keys=TRUE, ...){
+setMethod("listColumns", "MirtarbaseDb", function(x, table, skip.keys=TRUE, ...){
     if(length(x@tables)==0){
         tables <- dbListTables(x@con)
         ## read the attributes for these tables.
@@ -24,20 +24,20 @@ setMethod("listAttributes", "MirtarbaseDb", function(x, table, skip.keys=TRUE, .
         x@tables <- Tables
     }
     if(!missing(table)){
-        attrs <- x@tables[[ table ]]
+        columns <- x@tables[[ table ]]
     }else{
-        attrs <- unlist(x@tables, use.names=FALSE)
+        columns <- unlist(x@tables, use.names=FALSE)
     }
     if(skip.keys){
         ## remove everything that has a _pk or _fk...
-        idx <- grep(attrs, pattern="_fk$")
+        idx <- grep(columns, pattern="_fk$")
         if(length(idx) > 0)
-            attrs <- attrs[ -idx ]
-        idx <- grep(attrs, pattern="_pk$")
+            columns <- columns[ -idx ]
+        idx <- grep(columns, pattern="_pk$")
         if(length(idx) > 0)
-            attrs <- attrs[ -idx ]
+            columns <- columns[ -idx ]
     }
-    return(attrs)
+    return(columns)
 })
 
 setMethod("listExperiments", "MirtarbaseDb", function(x, ...){
@@ -133,30 +133,30 @@ setMethod("version", "MirtarbaseDb", function(object, ...){
 ##  we have to map first the mirfam or pre-miRNA IDs to
 ##  mature miRNA names.
 ##******************************************************
-setMethod("mtis", "MirtarbaseDb", function(x, attrs=listAttributes(x, "mirtarbase"),
+setMethod("mtis", "MirtarbaseDb", function(x, columns=listColumns(x, "mirtarbase"),
                                            filter, order.by="mirtarbase_id",
                                            order.type="asc", return.type="MTIList",
                                            force=FALSE){
     return.type <- match.arg(return.type, c("MTIList", "data.frame"))
     ## check if the attributes are correct:
-    torem <- !(attrs %in% listAttributes(x, "mirtarbase"))
+    torem <- !(columns %in% listColumns(x, "mirtarbase"))
     if(any(torem)){
-        warning(paste0("Attributes ", paste(attrs[ torem ], collapse=", "),
+        warning(paste0("Columns ", paste(columns[ torem ], collapse=", "),
                        " are not valid and have been removed." ))
-        attrs <- attrs[ !torem ]
+        columns <- columns[ !torem ]
     }
-    if(length(attrs)==0){
-        stop("No attributes submitted!")
+    if(length(columns)==0){
+        stop("No columns submitted!")
     }
     ## if we're going to return a MTI object we need all attributes:
     if(return.type=="MTIList")
-        attrs <- listAttributes(x, "mirtarbase")
-    ## check that the order.by is in the attrs, if not, drop it
-    if(!any(attrs == order.by))
+        columns <- listColumns(x, "mirtarbase")
+    ## check that the order.by is in the columns, if not, drop it
+    if(!any(columns == order.by))
         order.by <- ""
     ## Note values from e.g. PremirnaFilter are automatically mapped to
     ## mature miRNA ids in the respetive where method.
-    Res <- .getWhat(x, attrs=attrs, filter=filter, order.by=order.by,
+    Res <- .getWhat(x, columns=columns, filter=filter, order.by=order.by,
                     order.type=order.type, match.case=FALSE, force=force)
     if(return.type=="data.frame"){
         return(Res)
@@ -184,7 +184,7 @@ setMethod("mtisBy", "MirtarbaseDb", function(x, by="gene", filter){
         split.by <- "species_target_gene"
     if(by=="species_mirna")
         split.by <- "species_mirna"
-    Res <- .getWhat(x, attrs=listAttributes(x, "mirtarbase"), filter=filter,
+    Res <- .getWhat(x, columns=listColumns(x, "mirtarbase"), filter=filter,
                     order.by="mirtarbase_id")
     ## split here, and run data.frame2mtiNreport on the list...
     if(by %in% c("mirfam", "premirna")){
@@ -267,7 +267,7 @@ setMethod("shortShow", "MTI", function(object){
 })
 
 ## setter for report.
-setMethod("reports<-", signature(object="MTI", value="Report"), function(object, value){
+setMethod("reports<-", signature(object="MTI", value="MTIReport"), function(object, value){
     value <- list(value)
     names(value) <- unlist(lapply(value, pmid))
     object@report <- value
@@ -275,10 +275,11 @@ setMethod("reports<-", signature(object="MTI", value="Report"), function(object,
 })
 
 setMethod("reports<-", signature(object="MTI", value="list"), function(object, value){
-    Classes <- unique(unlist(lapply(value, class)))
-    if(any(Classes!="Report")){
-        stop("Only a list of Report objects is allowed!")
-    }
+    isReport <- unlist(lapply(value, function(z){
+        return(is(z, "MTIReport"))
+    }))
+    if(!all(isReport))
+        stop("value has to be either a single MTIReport class or a list of MTIReport classes")
     ## setting the names of the list
     names(value) <- unlist(lapply(value, pmid))
     object@report <- value
@@ -331,7 +332,7 @@ setMethod("reportCount", "MTI",
 setMethod("reports", "MTI",
           function(x, ...){
               if(length(x@report)==0){
-                  return(list(Report()))
+                  return(list(MTIReport()))
               }
               return(x@report)
           }
@@ -476,26 +477,26 @@ setMethod("mirfam", "MTIList", function(object, ...){
 ##  Report class methods
 ##
 ##******************************************************
-setMethod("show", "Report", function(object){
+setMethod("show", "MTIReport", function(object){
     cat(paste0("PMID: ", pmid(object), "\n"))
     cat(paste0("Support type: ", supportedBy(object), "\n"))
     cat(paste0("Experiments: ", paste(experiments(object), collapse=", "), "\n"))
 })
 ## these are the getter methods:
 ## slot: pmid
-setMethod("pmid", "Report", function(object, ...){
+setMethod("pmid", "MTIReport", function(object, ...){
     return(object@pmid)
 })
 ## slot experiments
-setMethod("experiments", "Report", function(object, ...){
+setMethod("experiments", "MTIReport", function(object, ...){
     return(object@experiments)
 })
 ## slot support_type
-setMethod("supportedBy", "Report", function(object, ...){
+setMethod("supportedBy", "MTIReport", function(object, ...){
     return(object@support_type)
 })
 ## cast a Report object into a data.frame
-setMethod("as.data.frame", "Report", function(x,
+setMethod("as.data.frame", "MTIReport", function(x,
                                               stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
     return(report2data.frame(x, row.names=pmid(x), stringsAsFactors=stringsAsFactors))
 })
@@ -518,14 +519,14 @@ setMethod("requireTable", signature(x="ExperimentFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("experiments" , db))
           })
-setMethod("attribute", signature(object="ExperimentFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="ExperimentFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("experiments")
           })
 setMethod("where", signature(object="ExperimentFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 ##***********************************************************************
@@ -537,14 +538,14 @@ setMethod("requireTable", signature(x="PublicationFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("references_pmid" , db))
           })
-setMethod("attribute", signature(object="PublicationFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="PublicationFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("references_pmid")
           })
 setMethod("where", signature(object="PublicationFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 ##***********************************************************************
@@ -556,7 +557,7 @@ setMethod("requireTable", signature(x="SpeciesFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("species_target_gene" , db))
           })
-setMethod("attribute", signature(object="SpeciesFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="SpeciesFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               if(!any(c("gene", "mirna") == object@feature))
                   stop("Parameter \"feature\" of SpeciesFilter should be either \"gene\" or \"mirna\"!")
@@ -577,7 +578,7 @@ setMethod("where", signature(object="SpeciesFilter", db="MirtarbaseDb"),
                   warning(paste0("Species \"", paste(notthere, collapse=","),"\" not known to the database! Use the listSpecies function to get all supported species names."))
               }
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 setMethod("show", "SpeciesFilter", function(object){
     callNextMethod()
@@ -592,7 +593,7 @@ setMethod("requireTable", signature(x="SupportTypeFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("support_type" , db))
           })
-setMethod("attribute", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("support_type")
           })
@@ -602,7 +603,7 @@ setMethod("where", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
                   warning(paste0("Support type \"", object@value,"\" not known to the database! Use the listSupportTypes function to get all support types."))
               }
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -632,14 +633,14 @@ setMethod("requireTable", signature(x="GenenameFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("target_gene" , db))
           })
-setMethod("attribute", signature(object="GenenameFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="GenenameFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("target_gene")
           })
 setMethod("where", signature(object="GenenameFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -655,14 +656,14 @@ setMethod("requireTable", signature(x="EntrezidFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("target_gene_entrez_gene_id" , db))
           })
-setMethod("attribute", signature(object="EntrezidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="EntrezidFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("target_gene_entrez_gene_id")
           })
 setMethod("where", signature(object="EntrezidFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -678,14 +679,14 @@ setMethod("requireTable", signature(x="MatmirnaFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirna" , db))
           })
-setMethod("attribute", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
 setMethod("where", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 ##***********************************************************************
@@ -700,7 +701,7 @@ setMethod("requireTable", signature(x="PremirnaFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("premirna", db))
           })
-setMethod("attribute", signature(object="PremirnaFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="PremirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
@@ -721,7 +722,7 @@ setMethod("where", signature(object="PremirnaFilter", db="MirtarbaseDb"),
                   return(NULL)
               object@value <- Matmirnas
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 ##***********************************************************************
@@ -736,7 +737,7 @@ setMethod("requireTable", signature(x="PremirnaidFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("premirna_id", db))
           })
-setMethod("attribute", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
@@ -757,7 +758,7 @@ setMethod("where", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
                   return(NULL)
               object@value <- Matmirnas
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -773,7 +774,7 @@ setMethod("requireTable", signature(x="MatmirnaidFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("matmirna_id", db))
           })
-setMethod("attribute", signature(object="MatmirnaidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MatmirnaidFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
@@ -791,7 +792,7 @@ setMethod("where", signature(object="MatmirnaidFilter", db="MirtarbaseDb"),
                   return(NULL)
               object@value <- Matmirnas
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -807,7 +808,7 @@ setMethod("requireTable", signature(x="MirfamFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirfam_name", db))
           })
-setMethod("attribute", signature(object="MirfamFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MirfamFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
@@ -825,7 +826,7 @@ setMethod("where", signature(object="MirfamFilter", db="MirtarbaseDb"),
                   return(NULL)
               object@value <- Matmirnas
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 
@@ -841,7 +842,7 @@ setMethod("requireTable", signature(x="MirfamidFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirfam_name", db))
           })
-setMethod("attribute", signature(object="MirfamidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MirfamidFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
@@ -859,7 +860,7 @@ setMethod("where", signature(object="MirfamidFilter", db="MirtarbaseDb"),
                   return(NULL)
               object@value <- Matmirnas
               suff <- callNextMethod()
-              return(paste(attribute(object, db), suff))
+              return(paste(column(object, db), suff))
           })
 
 

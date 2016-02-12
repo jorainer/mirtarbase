@@ -26,13 +26,13 @@ Johannes Rainer
 mirtarbase
 
 ## what type of object did we get?
-class( mirtarbase )
+class(mirtarbase)
 
 ## list all available evidence support types from the database
-listSupportTypes( mirtarbase )
+listSupportTypes(mirtarbase)
 
 ## list all species (for target genes):
-listSpecies( mirtarbase )
+listSpecies(mirtarbase)
 
 }
 \keyword{ data }
