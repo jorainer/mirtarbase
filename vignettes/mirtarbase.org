@@ -446,8 +446,12 @@ validated.
 * TODOs								   :noexport:
 
 ** TODO Fix all documentation discrepancies.
-** TODO Why the heck don't I get /distinct/ results?
+** DONE Why the heck don't I get /distinct/ results?
+   CLOSED: [2016-02-12 Fri 21:46]
 
+   - State "DONE"       from "TODO"       [2016-02-12 Fri 21:46]
+   - Checked it for BCL2, there it seems to work. Also, the query does include
+     distinct, thus it HAS to work.
 A =mtis= with columns =mirna= and =target_gene= returns non-unique results... why?
 
 ** TODO Warn if columns and return.type="data.frame".
@@ -457,6 +461,13 @@ In that case =columns= is ignored.
 ** TODO Update and fix help pages.
 ** TODO Update and fix the vignette.
 ** TODO Add/fix the copyright and license.
+** TODO Support filter as =list= or as =BasicFilter=
+** TODO Implement and fix the =like= and =ignore.case= in the =pre2mat= method
+
++ Do this in the methods in =mirbase-utils.R=.
++ The condition =like= does not work at present:
+  + Due to the =ifnotfound= that checks that result ids match input ids!
+  + Due to the /keep ordering/ behavior.
 
 * References
 

@@ -52,10 +52,10 @@ mirtarbaseDb <- function(x){
                         order.type="asc", match.case=FALSE, force=FALSE){
     resultcolumns <- columns
     collatequery <- ""
-    if(!missing(filter)){
+    if(!missing(filter) & length(filter) > 0){
         ## check filter!
-        if(class(filter)!="list")
-            stop("parameter filter has to be a list of BasicFilter classes!")
+        if(!is(filter, "list"))
+            stop("Parameter 'filter' has to be a list of BasicFilter classes!")
         ## add the columns needed for the filter
         filtercolumns <- unlist(lapply(filter, column, x))
         ##filtercolumns <- sapply(filtercolumns, removePrefix, USE.NAMES=FALSE)
@@ -67,7 +67,10 @@ mirtarbaseDb <- function(x){
             ## this means we've got one of the mappings from e.g. pre-miRNA to mature
             ## miRNA completely failing. In such a case we would eventually fetch the
             ## complete mirtarbase.
-            stop("One of the filters returned NULL. This most likely means that one of the submitted miRNA identifiers can not be mapped to a mature miRNA name! To still perform the query set parameter \"force=TRUE\".", call.=FALSE)
+            stop("One of the filters returned NULL. This most likely means",
+                 " that one of the submitted miRNA identifiers can not be mapped",
+                 " to a mature miRNA name! To still perform the query set parameter",
+                 " \"force=TRUE\".", call.=FALSE)
         }
         wherequery <- paste(" where", paste(unlist(wheres), collapse=" and "))
         ## should the query be performed case insensitive?

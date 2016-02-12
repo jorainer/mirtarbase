@@ -80,7 +80,16 @@ matmirna2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="d
 }
 
 ##
-pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", mat="mature_name", return.type="data.frame"){
+## CAVE: If we really want to use "like" and ignore.case:
+## o The ifnotfound mapping has to be revised.
+## o The re-ordering of the results has to be adapted.
+pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
+                    mat="mature_name", return.type="data.frame", ignore.case=FALSE){
+    if(ignore.case){
+        nocase <- " collate nocase"
+    }else{
+        nocase <- ""
+    }
     ## well, better to use SQL queries...
     ## straight forward way would be to use the get("hsa-mir-16-1", mirbaseMATURE)
     condition <- match.arg(condition, c("=", "!=", "in", "like", "not like"))
@@ -103,13 +112,20 @@ pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", mat="mature
     }
     ## if both pre and mat contain mature I can use a simpler, faster query.
     if(length(grep(c(pre, mat), pattern="^mature")) == 2){
-        Q <- paste0("select distinct ", pre, ", ", mat," from mirna_mature where ", pre," ", condition, " ", x)
+        Q <- paste0("select distinct ", pre, ", ", mat," from mirna_mature where ",
+                    pre," ", condition, " ", x)
     }else if(length(grep(c(pre, mat), pattern="^mirna")) == 2){
-        Q <- paste0("select distinct ", pre, ", ", mat," from mirna where ", pre," ", condition, " ", x)
+        Q <- paste0("select distinct ", pre, ", ", mat," from mirna where ",
+                    pre," ", condition, " ", x)
     }else{
-        Q <- paste0("select distinct ", pre, ", ", mat," from mirna join mirna_pre_mature on (mirna._id=mirna_pre_mature._id) join mirna_mature on (mirna_pre_mature.auto_mature=mirna_mature.auto_mature) where ", pre," ", condition, " ", x)
+        Q <- paste0("select distinct ", pre, ", ", mat," from mirna join",
+                    " mirna_pre_mature on (mirna._id=mirna_pre_mature._id)",
+                    " join mirna_mature on ",
+                    "(mirna_pre_mature.auto_mature=mirna_mature.auto_mature)",
+                    " where ", pre," ", condition, " ", x, nocase)
     }
     Res <- dbGetQuery(mirbase.con(), Q)
+    return(Res)
     ## add NA rows for x if not found:
     notfound <- unique(x.orig[ !(x.orig %in% Res[ , pre ]) ])
     if(length(notfound) > 0){
@@ -146,48 +162,64 @@ pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", mat="mature
 ##
 ##************************************************************
 premirna2mirfam <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, "mirna_id", "prefam_id", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mirna_id", "prefam_id", return.type=return.type)
     return(Res)
 }
 premirnaAcc2mirfam <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, "mirna_acc", "prefam_id", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mirna_acc", "prefam_id", return.type=return.type)
     return(Res)
 }
 premirnaAcc2mirfamAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, "mirna_acc", "prefam_acc", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mirna_acc", "prefam_acc", return.type=return.type)
     return(Res)
 }
 premirna2mirfamAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, "mirna_id", "prefam_acc", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mirna_id", "prefam_acc", return.type=return.type)
     return(Res)
 }
 mirfam2premirna <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_id", fam="mirna_id", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_id", fam="mirna_id", return.type=return.type)
     return(Res)
 }
 mirfam2premirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_id", fam="mirna_acc", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_id", fam="mirna_acc", return.type=return.type)
     return(Res)
 }
 mirfamAcc2premirna <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_acc", fam="mirna_id", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_acc", fam="mirna_id", return.type=return.type)
     return(Res)
 }
 mirfamAcc2premirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_acc", fam="mirna_acc", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_acc", fam="mirna_acc", return.type=return.type)
     return(Res)
 }
 mirfam2mirfamAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_id", fam="prefam_acc", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_id", fam="prefam_acc", return.type=return.type)
     return(Res)
 }
 mirfamAcc2mirfam <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound, pre="prefam_acc", fam="prefam_id", return.type=return.type)
+    Res <- pre2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   pre="prefam_acc", fam="prefam_id", return.type=return.type)
     return(Res)
 }
 
 ## map pre-miRNA ids/acc to miRNA family
-pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", fam="prefam_id", return.type="data.frame"){
+pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
+                    fam="prefam_id", return.type="data.frame", ignore.case=FALSE){
+    if(ignore.case){
+        nocase <- " collate nocase"
+    }else{
+        nocase <- ""
+    }
     ## well, better to use SQL queries...
     ## straight forward way would be to use the get("hsa-mir-16-1", mirbaseMATURE)
     condition <- match.arg(condition, c("=", "!=", "in", "like", "not like"))
@@ -210,9 +242,14 @@ pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", fam="prefam
     }
     ## if both pre and mat contain mature I can use a simpler, faster query.
     if(length(grep(c(pre, fam), pattern="^prefam")) == 2){
-        Q <- paste0("select distinct ", pre, ", ", fam," from mirna_prefam where ", pre," ", condition, " ", x)
+        Q <- paste0("select distinct ", pre, ", ", fam," from mirna_prefam where ",
+                    pre," ", condition, " ", x)
     }else{
-        Q <- paste0("select distinct ", pre, ", ", fam," from mirna join mirna_2_prefam on (mirna._id=mirna_2_prefam._id) join mirna_prefam on (mirna_2_prefam.auto_prefam=mirna_prefam.auto_prefam) where ", pre," ", condition, " ", x)
+        Q <- paste0("select distinct ", pre, ", ", fam," from mirna join",
+                    " mirna_2_prefam on (mirna._id=mirna_2_prefam._id) join",
+                    " mirna_prefam on",
+                    " (mirna_2_prefam.auto_prefam=mirna_prefam.auto_prefam)",
+                    " where ", pre," ", condition, " ", x, nocase)
     }
     Res <- dbGetQuery(mirbase.con(), Q)
     ## add NA rows for x if not found:
@@ -252,40 +289,54 @@ pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id", fam="prefam
 ##
 ##************************************************************
 matmirna2mirfam <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "mature_name", "prefam_id", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mature_name", "prefam_id", return.type=return.type)
     return(Res)
 }
 matmirna2mirfamAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "mature_name", "prefam_acc", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mature_name", "prefam_acc", return.type=return.type)
     return(Res)
 }
 matmirnaAcc2mirfam <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "mature_acc", "prefam_id", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mature_acc", "prefam_id", return.type=return.type)
     return(Res)
 }
 matmirnaAcc2mirfamAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "mature_acc", "prefam_acc", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "mature_acc", "prefam_acc", return.type=return.type)
     return(Res)
 }
 mirfam2matmirna <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, mat="prefam_id", fam="mature_name", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   mat="prefam_id", fam="mature_name", return.type=return.type)
     return(Res)
 }
 mirfam2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "prefam_id", "mature_acc", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "prefam_id", "mature_acc", return.type=return.type)
     return(Res)
 }
 mirfamAcc2matmirna <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "prefam_acc", "mature_name", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "prefam_acc", "mature_name", return.type=return.type)
     return(Res)
 }
 mirfamAcc2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="data.frame"){
-    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound, "prefam_acc", "mature_acc", return.type=return.type)
+    Res <- mat2fam(x, condition=condition, ifnotfound=ifnotfound,
+                   "prefam_acc", "mature_acc", return.type=return.type)
     return(Res)
 }
 
 ## map mature miRNA ids/acc to miRNA family
-mat2fam <- function(x, condition="=", ifnotfound=NA, mat="mature_name", fam="prefam_id", return.type="data.frame"){
+mat2fam <- function(x, condition="=", ifnotfound=NA, mat="mature_name",
+                    fam="prefam_id", return.type="data.frame", ignore.case=FALSE){
+    if(ignore.case){
+        nocase <- " collate nocase"
+    }else{
+        nocase <- ""
+    }
     ## well, better to use SQL queries...
     ## straight forward way would be to use the get("hsa-mir-16-1", mirbaseMATURE)
     condition <- match.arg(condition, c("=", "!=", "in", "like", "not like"))
@@ -306,7 +357,12 @@ mat2fam <- function(x, condition="=", ifnotfound=NA, mat="mature_name", fam="pre
     }else{
         x <- sQuote(x)
     }
-    Q <- paste0("select distinct ", mat, ", ", fam," from mirna_mature join mirna_pre_mature on (mirna_mature.auto_mature=mirna_pre_mature.auto_mature) join mirna_2_prefam on (mirna_pre_mature._id=mirna_2_prefam._id) join mirna_prefam on (mirna_2_prefam.auto_prefam=mirna_prefam.auto_prefam) where ", mat," ", condition, " ", x)
+    Q <- paste0("select distinct ", mat, ", ", fam," from mirna_mature join",
+                " mirna_pre_mature on",
+                " (mirna_mature.auto_mature=mirna_pre_mature.auto_mature)",
+                " join mirna_2_prefam on (mirna_pre_mature._id=mirna_2_prefam._id)",
+                " join mirna_prefam on (mirna_2_prefam.auto_prefam=mirna_prefam.auto_prefam)",
+                " where ", mat," ", condition, " ", x, nocase)
     Res <- dbGetQuery(mirbase.con(), Q)
     ## add NA rows for x if not found:
     notfound <- unique(x.orig[ !(x.orig %in% Res[ , mat ]) ])

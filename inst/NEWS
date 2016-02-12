@@ -5,6 +5,8 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o Renamed "Report" class into "MTIReport" class.
     o Renamed attribute method to column.
     o Renamed listAttributes method to listColumns
+    o Use case insensitive queries to map between mature miRNAs,
+      pre-miRNAs and miRNA families.
 
 BUG FIXES
     o Fixed RUnit tests

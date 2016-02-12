@@ -8,20 +8,24 @@
 ## calls unique on the column names required to build a Report object to avoid having duplicate entries in the result.
 data.frame2report <- function(x, colname.pmid="references_pmid",
                               colname.support="support_type",
-                              colname.experiments="experiments", split="//", do.unique=TRUE){
+                              colname.experiments="experiments",
+                              split="//", do.unique=TRUE){
     ## check for require columns
     Need <- c(colname.pmid, colname.support, colname.experiments)
     if(class(x)!="data.frame"){
         stop("Can only take data.frame as input!")
     }
     if(sum(colnames(x) %in% Need)!=length(Need)){
-        stop(paste0("One or more required columns (", paste(Need, collapse=","), ") not found!"))
+        stop(paste0("One or more required columns (", paste(Need, collapse=","),
+                    ") not found!"))
     }
     if(do.unique){
         x <- unique(x[ , Need, drop=FALSE ])
     }
     ## so, now I'm happy.
-    return(apply(x, MARGIN=1, row2report, name.pmid=colname.pmid, name.support=colname.support, name.experiments=colname.experiments, split=split))
+    return(apply(x, MARGIN=1, row2report, name.pmid=colname.pmid,
+                 name.support=colname.support,
+                 name.experiments=colname.experiments, split=split))
 }
 
 ## create a (single row) data.frame for a Report object
@@ -30,7 +34,8 @@ report2data.frame <- function(x, colname.pmid="references_pmid",
                               colname.experiments="experiments",
                               split="//", stringsAsFactors=FALSE, row.names=NULL){
     DF <- data.frame(a=x@pmid, b=paste(x@experiments, collapse=split),
-                     c=x@support_type, stringsAsFactors=stringsAsFactors, row.names=row.names)
+                     c=x@support_type, stringsAsFactors=stringsAsFactors,
+                     row.names=row.names)
     colnames(DF) <- c(colname.pmid, colname.experiments, colname.support)
     return(DF)
 }
@@ -53,7 +58,8 @@ data.frame2mti <- function(x, colname.id="mirtarbase_id",
         stop("Can only take data.frame as input!")
     }
     if(sum(colnames(x) %in% Need)!=length(Need)){
-        stop(paste0("One or more required columns (", paste(Need, collapse=","), ") not found!"))
+        stop(paste0("One or more required columns (", paste(Need, collapse=","),
+                    ") not found!"))
     }
     if(do.unique){
         x <- unique(x[ , Need, drop=FALSE ])

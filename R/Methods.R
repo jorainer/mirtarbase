@@ -84,16 +84,17 @@ setMethod("show", "MirtarbaseDb", function(object){
     cat(paste0("| miRTarbase date: ", object@mirtarbase_date, "\n"))
     con <- object@con
     ## number of MTIs:
-    mtis <- dbGetQuery(con, "select count(distinct mirtarbase_id) from mirtarbase;")[ 1, 1 ]
+    mtis <- dbGetQuery(con, "select count(distinct mirtarbase_id) from mirtarbase;")[1, 1]
     cat(paste0("| Number of MTIs: ", mtis ,"\n"))
-    miRNAs <- dbGetQuery(con, "select count(distinct mirna) from mirtarbase;")[ 1, 1 ]
+    miRNAs <- dbGetQuery(con, "select count(distinct mirna) from mirtarbase;")[1, 1]
     cat(paste0("| Number of miRNAs: ", miRNAs, "\n"))
     ## number of genes:
-    genes <- dbGetQuery(con, "select count(distinct target_gene) from mirtarbase;")[ 1, 1 ]
+    genes <- dbGetQuery(con, "select count(distinct target_gene) from mirtarbase;")[1, 1]
     cat(paste0("| Number of target genes: ", genes, "\n"))
     cat("| Number of MTIs grouped by support type:\n")
     ## MTI evidences:
-    Tab <- dbGetQuery(con, "select support_type, count(*) as number_MTI from mirtarbase group by support_type")
+    Tab <- dbGetQuery(con, paste0("select support_type, count(*) as number_MTI",
+                                  " from mirtarbase group by support_type"))
     for(i in 1:nrow(Tab)){
         cat(paste0("| * ", Tab[ i, 1 ], ": ", Tab[ i, 2 ],"\n"))
     }
@@ -138,6 +139,7 @@ setMethod("mtis", "MirtarbaseDb", function(x, columns=listColumns(x, "mirtarbase
                                            order.type="asc", return.type="MTIList",
                                            force=FALSE){
     return.type <- match.arg(return.type, c("MTIList", "data.frame"))
+    filter <- .checkFilter(filter)
     ## check if the attributes are correct:
     torem <- !(columns %in% listColumns(x, "mirtarbase"))
     if(any(torem)){
@@ -149,8 +151,13 @@ setMethod("mtis", "MirtarbaseDb", function(x, columns=listColumns(x, "mirtarbase
         stop("No columns submitted!")
     }
     ## if we're going to return a MTI object we need all attributes:
-    if(return.type=="MTIList")
+    if(return.type=="MTIList"){
+        gotCols <- columns
         columns <- listColumns(x, "mirtarbase")
+        if(!all(columns %in% gotCols))
+            warning("Specifying 'columns' with 'return.type' set to \"MTIList\"",
+                    " is not possible.")
+    }
     ## check that the order.by is in the columns, if not, drop it
     if(!any(columns == order.by))
         order.by <- ""
@@ -165,12 +172,34 @@ setMethod("mtis", "MirtarbaseDb", function(x, columns=listColumns(x, "mirtarbase
     }
 })
 
+.checkFilter <- function(filter){
+    if(missing(filter))
+        return(list())
+    if(is(filter, "list")){
+        isAFilter <- unlist(lapply(filter, function(z){
+            return(is(z, "BasicFilter"))
+        }))
+        if(!all(isAFilter))
+            stop("Argument 'filter' has to be a single 'BasicFilter object or a list",
+                 " of such objects!")
+        return(filter)
+    }else{
+        if(is(filter, "BasicFilter")){
+            return(list(filter))
+        }else{
+            stop("Argument 'filter' has to be a single 'BasicFilter object or a list",
+                 " of such objects!")
+        }
+    }
+}
+
 ## return mtis by some selected attribute:
 setMethod("mtisBy", "MirtarbaseDb", function(x, by="gene", filter){
     by <- match.arg(by, c("gene", "matmirna", "entrezid", "pmid",
                           "support_type", "premirna", "mirfam", "species_gene",
                           "species_mirna"))
     ## split by what.
+    filter <- .checkFilter(filter)
     split.by <- "target_gene"
     if(by=="matmirna")
         split.by <- "mirna"
@@ -208,7 +237,7 @@ setMethod("mtisBy", "MirtarbaseDb", function(x, by="gene", filter){
             suppressWarnings(
                 tmp <- do.call(rbind, applyfun(split(Res, 1:nrow(Res)),
                                                FUN=function(z){
-                                                   pres <- matmirna2premirna(z$mirna)[ , 2 ]
+                                                   pres <- matmirna2premirna(z$mirna)[, 2]
                                                    pres[ is.na(pres) ] <- "unknown"
                                                    return(data.frame(premirna=pres, z,
                                                                      check.names=FALSE))
@@ -381,17 +410,18 @@ setMethod("matmirnaId", "MTI",
 ##               return(unique(matseq))
 ##           })
 
-setMethod("as.data.frame", "MTI", function(x, collapse.reports=NULL,
-                                           stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
-    df <- mti2data.frame(x, collapse.reports=collapse.reports,
-                         stringsAsFactors=stringsAsFactors)
-    if(is.null(collapse.reports)){
-        rownames(df) <- NULL
-    }else{
-        rownames(df) <- id(x)
-    }
-    return(df)
-})
+setMethod("as.data.frame", "MTI",
+          function(x, collapse.reports=NULL,
+                   stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
+              df <- mti2data.frame(x, collapse.reports=collapse.reports,
+                                   stringsAsFactors=stringsAsFactors)
+              if(is.null(collapse.reports)){
+                  rownames(df) <- NULL
+              }else{
+                  rownames(df) <- id(x)
+              }
+              return(df)
+          })
 
 ##******************************************************
 ##
@@ -413,15 +443,16 @@ setMethod("show", "MTIList", function(object){
     }
 })
 ## as.data.frame
-setMethod("as.data.frame", "MTIList", function(x, collapse.reports=NULL,
-                                               stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
-    tmp <- do.call(rbind, lapply(x, as.data.frame,
-                                 collapse.reports=collapse.reports,
-                                 stringsAsFactors=stringsAsFactors))
-    if(is.null(collapse.reports))
-        rownames(tmp) <- NULL
-    return(tmp)
-})
+setMethod("as.data.frame", "MTIList",
+          function(x, collapse.reports=NULL,
+                   stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
+              tmp <- do.call(rbind, lapply(x, as.data.frame,
+                                           collapse.reports=collapse.reports,
+                                           stringsAsFactors=stringsAsFactors))
+              if(is.null(collapse.reports))
+                  rownames(tmp) <- NULL
+              return(tmp)
+          })
 ## entrezid: returns characted vector
 setMethod("entrezid", "MTIList", function(object, ...){
     return(unlist(lapply(object, entrezid)))
@@ -496,9 +527,11 @@ setMethod("supportedBy", "MTIReport", function(object, ...){
     return(object@support_type)
 })
 ## cast a Report object into a data.frame
-setMethod("as.data.frame", "MTIReport", function(x,
-                                              stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
-    return(report2data.frame(x, row.names=pmid(x), stringsAsFactors=stringsAsFactors))
+setMethod("as.data.frame", "MTIReport",
+          function(x,
+                   stringsAsFactors=getOption("stringsAsFactors", TRUE), ...){
+              return(report2data.frame(x, row.names=pmid(x),
+                                       stringsAsFactors=stringsAsFactors))
 })
 
 
@@ -560,7 +593,8 @@ setMethod("requireTable", signature(x="SpeciesFilter", db="MirtarbaseDb"),
 setMethod("column", signature(object="SpeciesFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               if(!any(c("gene", "mirna") == object@feature))
-                  stop("Parameter \"feature\" of SpeciesFilter should be either \"gene\" or \"mirna\"!")
+                  stop("Parameter \"feature\" of SpeciesFilter should be",
+                       " either \"gene\" or \"mirna\"!")
               if(object@feature=="gene")
                   return("species_target_gene")
               if(object@feature=="mirna")
@@ -569,13 +603,16 @@ setMethod("column", signature(object="SpeciesFilter", db="MirtarbaseDb"),
 setMethod("where", signature(object="SpeciesFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               if(!any(c("gene", "mirna") == object@feature))
-                  stop("Parameter \"feature\" of SpeciesFilter should be either \"gene\" or \"mirna\"!")
+                  stop("Parameter \"feature\" of SpeciesFilter should be",
+                       " either \"gene\" or \"mirna\"!")
               allspecies <- unique(c(listSpecies(db, "gene"), listSpecies(db, "mirna")))
               Vals <- object@value
               notthere <- Vals[ !(Vals %in% allspecies) ]
               object@value <- Vals
               if(length(notthere) > 0){
-                  warning(paste0("Species \"", paste(notthere, collapse=","),"\" not known to the database! Use the listSpecies function to get all supported species names."))
+                  warning("Species \"", paste(notthere, collapse=","),"\" ",
+                          "not known to the database! Use the listSpecies function",
+                          " to get all supported species names.")
               }
               suff <- callNextMethod()
               return(paste(column(object, db), suff))
@@ -600,7 +637,9 @@ setMethod("column", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
 setMethod("where", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               if(!any(listSupportTypes(db)==object@value)){
-                  warning(paste0("Support type \"", object@value,"\" not known to the database! Use the listSupportTypes function to get all support types."))
+                  warning("Support type \"", object@value,"\" not known to",
+                          " the database! Use the listSupportTypes function",
+                          " to get all support types.")
               }
               suff <- callNextMethod()
               return(paste(column(object, db), suff))
