@@ -1,0 +1,49 @@
+## imports
+import(utils)
+import(methods)
+import(BiocGenerics)
+import(RSQLite)
+import(mirbase.db)
+import(AnnotationDbi)
+import(S4Vectors)
+importFrom(parallel, mclapply)
+importClassesFrom(ensembldb, BasicFilter, GenenameFilter, EntrezidFilter)  ## filters
+importFrom(ensembldb, GenenameFilter, EntrezidFilter)
+importMethodsFrom(ensembldb, attribute, where, connection, listAttributes,
+                  listTables, condition)
+importClassesFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
+                  MatmirnaidFilter, MirfamFilter, MirfamidFilter)  ## filters
+importFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
+           MatmirnaidFilter, MirfamFilter, MirfamidFilter)
+importMethodsFrom(mirhostgenes, attribute, where)
+importFrom(DBI, dbDriver)
+
+export("Report")
+export("MTI")
+## classes:
+exportClasses(MirtarbaseDb, Report, MTI, ExperimentFilter, PublicationFilter,
+              SpeciesFilter, SupportTypeFilter, MTIList)
+## methods for MirtarbaseDb:
+exportMethods(dbconn, show, listAttributes, listExperiments, listPmids,
+              listSpecies, listSupportTypes, mtis, mtisBy, show, listTables, version)
+## methods for MTI and Report classes
+exportMethods(as.data.frame, entrezid, experiments, gene, geneSpecies,
+              id, matmirna, matmirnaId, mirfam, mirnaSpecies, pmid, premirna, premirnaId,
+              reportCount, reports, "reports<-", supportedBy)
+export(ExperimentFilter, PublicationFilter, SpeciesFilter, SupportTypeFilter, MTIList)
+## export mirbase conversion functions from pre-miRNA to mature miRNAs
+export(premirna2matmirna, premirna2matmirnaAcc, premirnaAcc2matmirnaAcc,
+       premirnaAcc2matmirna, premirnaAcc2premirna, premirna2premirnaAcc)
+## export mirbase conversion functions from mature miRNAs to pre-miRNAs
+export(matmirna2premirna, matmirna2premirnaAcc, matmirnaAcc2premirnaAcc,
+       matmirnaAcc2premirna, matmirnaAcc2matmirna, matmirna2matmirnaAcc)
+## export mirbase conversion from pre-miRNA to mirfam:
+export(premirna2mirfam, premirnaAcc2mirfam, premirnaAcc2mirfamAcc,
+       premirna2mirfamAcc, mirfam2premirna, mirfam2premirnaAcc, mirfamAcc2premirna,
+       mirfamAcc2premirnaAcc, mirfam2mirfamAcc, mirfamAcc2mirfam)
+## export mirbase conversion from mature miRNA to mirfam
+export(matmirna2mirfam, matmirna2mirfamAcc, matmirnaAcc2mirfam, matmirnaAcc2mirfamAcc,
+       mirfam2matmirna, mirfam2matmirnaAcc, mirfamAcc2matmirna, mirfamAcc2matmirnaAcc)
+
+##exportMethods(show, experiments, supportedBy, pmid, id, reports, experiments, matureMirna, mirnaSpecies, targetGene, targetGeneSpecies, targetGeneEntrezid, reportCount, mirna, mirnaAccession, mirnaFamily, matureAccession, matureSequence)
+

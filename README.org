@@ -1,0 +1,306 @@
+#+TITLE:miRTarBase R package
+#+AUTHOR: Johannes Rainer
+#+email: johannes.rainer@i-med.ac.at
+
+
+* miRTarBase R package
+
+For more information please refer to the [[file:vignettes/mirtarbase.org]] file.
+
+
+* Old stuff							   :noexport:
+
+This packages provides the miRNA-target gene interactions (MTI) from the miRTarBase.
+
+** Installation
+
+Clone the git repository and build the package using:
+
+#+BEGIN_EXAMPLE
+  R CMD build mirtarbase-db
+#+END_EXAMPLE
+
+To install the package call:
+
+#+BEGIN_EXAMPLE
+  R CMD INSTALL mirtarbase.db_*
+#+END_EXAMPLE
+
+After that you can use the package as any other R package. The package provides also a vignette with some examples that can be opened, after loading the library in R (=library(mirtarbase.db)=), by the =openVignette()= command.
+
+** Create the database file
+
+Using the code in this section we create the =SQLite= database for the package. The workflow is the following: first we have to download the XLS spreadsheet from the miRTarBase web site, which we have to open in Excel and export as tabulator delimited text file. We will then read this file into R in order format it for our requirements (i.e. rename the column names) and we store this file than into a =SQLite= database.
+
+Assuming that the Excel file has been downloaded from http://mirtarbase.mbc.nctu.edu.tw/php/download.php and has been exported as a tabulator delimited txt file to =orig_files/txt=. Next we read this file, rename the columns and export it again as a tab delimited text file (over-writing the original one).
+
+It is a little more complicated to process this file due to the following problems:
++ Experiments column contains 5' RACE and 5" RACE and these will be recognized by =R= as quotes. Thus we have to read the file without specifying quotes.
++ Experiments column contains /Weak/ but also /WeaK/, will have to replace these.
++ Some Entrezgene IDs are NA.
+
+All in all, we hope that we don't encounter some more issues in the next release.
+
+#+NAME: src.read.tables
+#+BEGIN_SRC R :results silent :exports results :eval never
+  library( RSQLite )
+  ## the XLS file contains ' and " inside cells, thus have to set qupte=""
+  MTI <- read.table( "orig_files/txt/miRTarBase_MTI.txt", sep="\t", as.is=TRUE, header=TRUE, check.names=FALSE, quote="" )
+  ## re-formating column names.
+  CN <- tolower( colnames( MTI ) )
+  CN <- gsub( CN, pattern="\"", replacement="" )
+  CN <- gsub( CN, pattern="[(|)]", replacement="" )
+  CN <- gsub( CN, pattern=" ", replacement="_", fixed=TRUE )
+  colnames( MTI ) <- CN
+  ## now I want to get rid of ALL \", ", ' in the table!
+  character.CN <- CN[ !CN %in% c( "target_gene_entrez_gene_id", "references_pmid" ) ]
+  ## loop through all these columns and replace "\""
+  for( current.CN in character.CN ){
+      MTI[ , current.CN ] <- gsub( MTI[ , current.CN ], pattern="\"", replacement="" )
+  }
+  ## now, replace all remaining " and ' in experiments
+  MTI[ , "experiments" ] <- gsub( MTI[ , "experiments" ], pattern="'", replacement="", fixed=TRUE )
+  ## fixing the WeaK thing.
+  MTI[ , "support_type" ] <- gsub( MTI[ , "support_type" ], pattern="WeaK", replacement="Weak", fixed=TRUE )
+  ## fix NA entrezids
+  which.NAs <- which( is.na( MTI$target_gene_entrez_gene_id ) )
+  ## for all of these, check if there is another gene, same species.
+  for( idx in which.NAs ){
+      tmp <- MTI[ MTI$target_gene==MTI[ idx, "target_gene" ] &
+                     MTI$species_target_gene==MTI[ idx, "species_target_gene" ], , drop=FALSE ]
+      if( length( tmp[ !is.na( tmp$target_gene_entrez_gene_id ), "target_gene_entrez_gene_id" ] ) > 0 ){
+          MTI[ idx, "target_gene_entrez_gene_id" ] <-
+              unique( tmp[ !is.na( tmp$target_gene_entrez_gene_id ), "target_gene_entrez_gene_id" ] )
+      }
+  }
+  ## exporting the file again.
+  ## write.table( MTI, file="orig_files/txt/miRTarBase_MTI.txt", sep="\t", row.names=FALSE )
+
+#+END_SRC
+
+We could also create the database in a cleaner way, i.e. as a /real/ relational database with a table for the miRNA target gene interaction, a table with the evidence (Report) and one relating each other. The question remains whether that would improve it's performance.
+Note that each publication can have more than one report.
+
+#+BEGIN_SRC R :results silent :exports code :eval never
+  ## want to know whether the "report" is unique
+  ## (i.e. pubmed id, experiments and support type) across all miRNAs are specific for a miRNA.
+  Report <- data.frame( matrix( ncol=4, nrow=0 ), stringsAsFactors=FALSE )
+  colnames( Report ) <- c( "report_id", "experiments", "support_type", "references_pmid" )
+  mti2report <- matrix( ncol=2, nrow=0 )
+  colnames( mti2report ) <- c( "mti_id", "report_id" )
+  for( i in 1:nrow( MTI ) ){
+      current.rep <- MTI[ i, c( "experiments", "support_type", "references_pmid" ) ]
+      ## check if it's in Report
+      idx <- which( rownames( Report )==paste0( current.rep[ 1, ], collapse="-" ) )
+      if( length( idx ) > 0 ){
+          ## have it already
+          #cat( "have already the report\n" )
+          report.id <- Report[ idx, "report_id" ]
+      }else{
+          rownames( current.rep ) <- paste0( current.rep[ 1, ], collapse="-" )
+          report.id <- paste0( "MTIR", sprintf( "%04d", ( nrow( Report )+1 ) ) )
+          current.rep <- cbind( report_id=report.id, current.rep, stringsAsFactors=FALSE )
+          Report <- rbind( Report, current.rep )
+      }
+      ## add it to mti2report.
+      mti2report <- rbind( mti2report, c( MTI[ i, 1 ], report.id ) )
+  }
+  ## at last define the MTI table.
+  MTI.table <- unique( MTI[ , !( colnames( MTI ) %in% colnames( Report ) ) ] )
+
+  ## ok, now we do have all tables.
+  con <- dbConnect( dbDriver( "SQLite" ), dbname="inst/extdata/db/mirtarbase_rel.db" )
+  if( dbExistsTable( con, "mti" ) ){
+      dbRemoveTable( con, "mti" )
+  }
+  if( dbExistsTable( con, "report" ) ){
+      dbRemoveTable( con, "report" )
+  }
+  if( dbExistsTable( con, "mti2report" ) ){
+      dbRemoveTable( con, "mti2report" )
+  }
+  ## mti
+  dbWriteTable( con, name="mti", MTI.table, row.names=FALSE )
+  dbGetQuery( con, "create index mirna_idx on mti (mirna);" )
+  dbGetQuery( con, "create index target_gene_idx on mti (target_gene);" )
+  dbGetQuery( con, "create index target_gene_entrez_idx on mti (target_gene_entrez_gene_id);" )
+  ## report
+  dbWriteTable( con, name="report", Report, row.names=FALSE )
+  dbGetQuery( con, "create index report_id_idx on report (report_id);" )
+  ## mti2report
+  dbWriteTable( con, name="mti2report", data.frame( mti2report, stringsAsFactors=FALSE ), row.names=FALSE )
+  dbGetQuery( con, "create index mti2report_report_idx on mti2report (report_id);" )
+  dbGetQuery( con, "create index mti2report_mti_idx on mti2report (mti_id);" )
+
+  dbDisconnect( con )
+
+#+END_SRC
+
+Next we create the database for the package. This requires a working installation of =SQLite=.
+
+#+NAME: src.create.tables
+#+BEGIN_SRC R :results silent :exports code :eval never
+  con <- dbConnect( dbDriver( "SQLite" ), dbname="inst/extdata/mirtarbase.sqlite" )
+  if( dbExistsTable( con, "mirtarbase" ) ){
+      dbRemoveTable( con, "mirtarbase" )
+  }
+  dbWriteTable( con, name="mirtarbase", MTI, row.names=FALSE )
+  dbGetQuery( con, "create index mirna_idx on mirtarbase (mirna);" )
+  dbGetQuery( con, "create index target_gene_idx on mirtarbase (target_gene);" )
+  dbGetQuery( con, "create index target_gene_entrez_idx on mirtarbase (target_gene_entrez_gene_id);" )
+  dbDisconnect( con )
+#+END_SRC
+
+
+** Database layout
+
+This database consists of a single table, =mirtarbase= which contains all information stored in the xls file from the miRTarbase web site. The column names and their properties are listed below. Each line in the table represents the MTI for a miRNA and one of its target genes as reported in a publication.
+
++ =mirtarbase_id=: identifier for the miRNA target gene interaction (MTI). Note that this ID is not unique, i.e. MTIs reported in several publications have the same ID but are listed in several rows of the table.
++ =mirna=: mature miRNA name (a.k.a miRNA ID, e.g. hsa-miR-20a-5p).
++ =species_mirna=: the species of the miRNA (e.g. /Homo sapiens/).
++ =target_gene=: the official gene name (symbol) for the gene (e.g. /DUSP6/, or /ush/).
++ =target_gene_entrez_gene_id=: the NCBI Entrezgene ID for the target gene; either =NA= or the (numerical) Entrezgene ID. Contains only unique values, no multiple IDs collapsed by any separator.
++ =species_target_gene=: the species of the target gene.
++ =experiments=: the experiments providing the evidence for the interaction as reported in one publication.
++ =support_type=: the different types of support (from weak to strong).
++ =references_pmid=: the Pubmed ID of the publication reporting the MTI. Each line with a single Pubmed ID, no empty (=NA=) values.
+
+** Performance evaluation of relational and not relational DB	   :noexport:
+
+#+NAME: src.performance.check
+#+BEGIN_SRC R :results silent :exports code :eval never
+  con <- dbConnect( dbDriver( "SQLite" ), dbname="inst/extdata/db/mirtarbase.db" )
+  con.rel <- dbConnect( dbDriver( "SQLite" ), dbname="inst/extdata/db/mirtarbase_rel.db" )
+
+  system.time(
+      Res <- dbGetQuery( con , "select * from mirtarbase where target_gene='BCL2L11';" )
+  )
+  system.time(
+      Res.rel <- dbGetQuery( con.rel , "select * from (select * from mti where target_gene='BCL2L11') as tmp join mti2report on tmp.mirtarbase_id=mti2report.mti_id join report on mti2report.report_id=report.report_id;" )
+  )
+  ## about the same speed.
+  any( Res$mirtarbase_id!=Res.rel$mirtarbase_id )
+  any( Res$references_pmid!=Res.rel$references_pmid )
+
+  system.time(
+      Res <- dbGetQuery( con , "select * from mirtarbase where species_mirna='Homo sapiens';" )
+  )
+  system.time(
+      Res.rel <- dbGetQuery( con.rel , "select * from (select * from mti where species_mirna='Homo sapiens') as tmp join mti2report on tmp.mirtarbase_id=mti2report.mti_id join report on mti2report.report_id=report.report_id;" )
+  )
+  ## Ok, so the relational version is slower... will stick to the non-relational one.
+#+END_SRC
+
+While the relational database version might have some advantages, it is slower. Thus we stick to the non-relational, single table version.
+
+** Development
+
+At present (<2014-07-28>), the miRTarBase can only be exported as a XLS spread sheet. This file contains one line per MTI and publication:
+
++ MTI MIRT000140: online: 2 references, XLS sheet: one (one reference missing in XLS sheet).
++ MTI MIRT001206: online: 8 references, XLS sheet: 3 rows (several rows missing).
++ MTI MIRT003413: online: 4 references, XLS sheet: 2 rows (2 rows missing):
+  - PMID: 18328430: experiments: Luciferase reporter assay//Microarray//Western blot; evidence: Functional MTI. Online: also Other listed as experiment.
+  - PMID: 19422085: experiments: Luciferase reporter assay//Microarray//qRT-PCR//Western blot; evidence: Functional MTI. Online: also Other listed as experiment.
+
+Thus, an MTI between the same miRNA and target gene (for the same species!) is stored in several rows in the XLS sheet. Each row seems however be related to one publication, and the field /experiments/ seems to list all experiments performed in that publication.
+
+One question is whether the XLS sheet should be stored as-is to the database, or whether a clean relational database should be created. The benefit from the latter approach would be to allow more specific queries, e.g. all MTIs based on a certain support type.
+
+It would be possible to create a relational database with 3 tables, one describing the MTI, one listing the experiments performed in a publication to validate this MTI and one allowing for possible n:m relations (although it's not clear whether these really exist... yet).
+
+*** The MTI class
+
+The MTI class represents a miRNA target gene interaction. There should only be one MTI for a miRNA target gene combination, with multiple evidences and eventually multiple publications. The unique identifier for a MTI is the identifier used in the miRTarBase (e.g. /MIRT001206/).
+
+class MTI
+       L_ class Report
+                 L_ experiments: lists all experiments that have been performed.
+                 L_ pmid: returns the (PMID) of the report.
+                 L_ supportedBy: list support type(s) (evidences).
+       L_ reports: returns the Report(s) of the MTI.
+       L_ experiments: returns all experiments (of the Report(s)).
+       L_ pmids: returns the PMIDs of the Report(s).
+       L_ supportedBy
+
+
+** Changelog:
+
++ version 0.2.2 (2014-08-12);
+  - =getMti= will use =mclapply= to query the database and process its results if the number of mature miRNA sequences is larger than 20.
++ version 0.2.1 (2014-08-01);
+  - Added some functions to retrieve annotations from the mirbase package.
+  - Added the Vignette.
++ version 0.2.0 (2014-08-01):
+  - Fixed some series problems in the XLS sheet from the miRTarBase. Missed some MTIs in the previous database versions.
+  - Removed functions =getMtiForGene= and =getMtiForMiRNA= and replaced both with =getMti=.
++ version 0.1.0 (2014-07-29): it's done: the first /release/. Basic functionality, not Vignette, no S4 objects (yet).
++ version 0.0.1 (2014-07-28): added database.
+
+** TODOs
+
+*** DONE Check and update database
+    CLOSED: [2015-02-26 Thu 06:52]
+    - State "DONE"       from "TODO"       [2015-02-26 Thu 06:52]
+    - Unfortunately no update available!
+
+*** DONE Organize all functions and files
+    CLOSED: [2015-03-03 Tue 12:23]
+    - State "DONE"       from "TODO"       [2015-03-03 Tue 12:23]
++ [X] Put all methods into /Methods.R/.
++ [X] Put all classes into /Classes.R/.
++ [X] Put all functions performing queries to the database into /dbhelpers.R/.
+
+*** DONE Setup basic functionality
+    CLOSED: [2015-03-03 Tue 12:23]
+    - State "DONE"       from "TODO"       [2015-03-03 Tue 12:23]
++ [X] Onload: load the database
++ [ ] Cross-check species name and short names using =data.frame= read on =onload=. (what did I mean by that???)
++ [X] On database load: read the available support types and available experiments from the database and store them internally.
+
+*** DONE link to the =mirbase= package
+    CLOSED: [2015-02-27 Fri 13:41]
+    - State "DONE"       from "TODO"       [2015-02-27 Fri 13:41]
+Might be better to link this package to the =mirbase= package for mapping of mature miRNAs to pre-miRNAs and mirFams than to use the =mirnahostgenes= package, as that one is specific for a single species.
+
++ [X] Functionality to map pre-miRNA ID to mature miRNA name.
++ [X] Functionality to map pre-miRNA accession to mature miRNA name.
++ [X] Functionality to map mature miRNA accession to mature miRNA name.
++ [X] Functionality to map miRfam name to mature miRNA names.
++ [X] Functionality to map miRfam accession to mature miRNA names.
+
+
+*** DONE (Re-) implement methods
+    CLOSED: [2015-03-04 Wed 16:08]
+    - State "DONE"       from "TODO"       [2015-03-04 Wed 16:08]
++ [X] mtis: get all MTIs from the database (as list of MTI object or data.frame).
++ [ ] matmirnas: get all mature miRNAs from the database. Why?
++ [X] mtisBy: get all MTIs ordered by something from the database.
+
+*** DONE Implement Filters
+    CLOSED: [2015-03-03 Tue 12:24]
+    - State "DONE"       from "TODO"       [2015-03-03 Tue 12:24]
++ [X] SpeciesFilter: cross-check the submitted species ids with the species available in the data base. Species for miRNA and for target gene.
++ [X] SupportTypeFilter: cross-check the submitted support type with the ones available in the database.
++ [X] ExperimentFilter: cross-check the submitted experiment names with the ones available in the database.
+
+*** DONE Check functionality
+    CLOSED: [2015-03-03 Tue 12:24]
+    - State "DONE"       from "TODO"       [2015-03-03 Tue 12:24]
++ [X] Test all methods for =MTI= classes.
++ [X] Test all methods for =Report= classes.
++ [X] Test conversion functions.
+
+*** DONE Define a class =MTIList= [3/3]
+    CLOSED: [2015-03-04 Wed 16:08]
+    - State "DONE"       from "TODO"       [2015-03-04 Wed 16:08]
++ [X] Extends =List= from the =S4Vectors= package.
++ [X] Implements methods to easily retrieve values from the internal =MTI= classes.
++ [X] Implements a nice-looking =show= function.
+
+*** DONE Write a vignette
+    CLOSED: [2015-03-04 Wed 16:09]
+    - State "DONE"       from "TODO"       [2015-03-04 Wed 16:09]
+*** TODO Think how I could include the stuff from Simon, i.e. the other target database.
+*** TODO Design a more general (relational) database layout that allows to store additional target genes from other sources too!

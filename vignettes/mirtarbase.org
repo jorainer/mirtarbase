@@ -1,0 +1,434 @@
+#+TITLE: mirtarbase: a database of validated miRNA target gene interactions
+#+AUTHOR:    Johannes Rainer
+#+EMAIL:     johannes.rainer@eurac.edu
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE: en
+#+OPTIONS: ^:{}
+#+PROPERTY: exports code
+#+PROPERTY: session *R_mirtarbase*
+
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+#+latex: %\VignetteIndexEntry{mirtarbase: a database of validated miRNA target gene interactions}
+#+latex: %\VignetteKeywords{annotation, database, miRNA}
+#+latex: %\VignetteDepends{mirtarbase}
+#+latex: %\VignettePackage{mirtarbase}
+#+latex: %\VignetteEngine{knitr::knitr}
+
+#+BEGIN_EXPORT html
+---
+title: "mirtarbase: a database of validated miRNA target gene interactions"
+graphics: yes
+output:
+  BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{mirtarbase: a database of validated miRNA target gene interactions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{mirtarbase,BiocStyle}
+  %\VignettePackage{mirtarbase}
+  %\VignetteKeywords{annotation,database,miRNA}
+bibliography: references.bib
+csl: biomed-central.csl
+references:
+- id: dummy
+  title: no title
+  author:
+  - family: noname
+    given: noname
+---
+#+END_EXPORT
+
+#+BEGIN_EXPORT html
+**Package**: `r BiocStyle::Biocpkg("mirtarbase")`<br />
+**Authors**: `r packageDescription("mirtarbase")$Author`<br />
+**Modified**: 12 February, 2016<br />
+**Compiled**: `r date()`
+#+END_EXPORT
+
+* How to export this to a =Rmd= vignette			   :noexport:
+
+Use =ox-ravel= to export this file as an R markdown file (=C-c C-e m r=). That
+way we don't need to edit the resulting =Rmd= file.
+
+* How to export this to a =Rnw= vignette 			   :noexport:
+
+Use =ox-ravel= from the =orgmode-accessories= package to export this file to a =Rnw= file. After export edit the generated =Rnw= in the following way:
+
+1) Delete all =\usepackage= commands.
+2) Move the =<<style>>= code chunk before the =\begin{document}= and before =\author=.
+3) Move all =%\Vignette...= lines at the start of the file (even before =\documentclass=).
+4) Replace =\date= with =\date{Modified: 21 October, 2013. Compiled: \today}=
+
+Note: use =:ravel= followed by the properties for the code chunk headers, e.g. =:ravel results='hide'=. Other options for knitr style options are:
++ =results=: ='hide'= (hides all output, not warnings or messages), ='asis'=, ='markup'= (the default).
++ =warning=: =TRUE= or =FALSE= whether warnings should be displayed.
++ =message=: =TRUE= or =FALSE=, same as above.
++ =include=: =TRUE= or =FALSE=, whether the output should be included into the final document (code is still evaluated).
+
+* Introduction
+
+The =mirtarbase= package provides the experimentally validated miRNA-target gene
+interactions (MTIs) defined in the miRTarbase database \cite{Hsu:2014co}.
+
+#+BEGIN_SRC R :ravel warning=FALSE, message=FALSE
+  library(mirtarbase)
+#+END_SRC
+
+This package was build based on the Excel spread sheet that can be downloaded
+from the miRTarbase main site [[http://mirtarbase.mbc.nctu.edu.tw/]].
+
+* Usage
+
+After the package is loaded the database can be accessed through the
+=MirtarbaseDb= object bound to the =mirtarbase= variable.
+
+#+BEGIN_SRC R
+  ## print some information for the package
+  mirtarbase
+#+END_SRC
+
+The miRTarbase defines a MTI for each mature miRNA - target gene pair and
+provides at least one publication in which this interaction was experimentally
+verified along with the support type (i.e. one of four evidence grades that was
+defined by the developers), the experiments supporting the interaction and the
+Pubmed ID. This information is stored internally in a SQLite database (see
+Section [[section.database.layout]] for the layout of the database and the
+attributes).
+
+Before we start with some usage scenarios for the package it is important to
+understand the mechanism to fetch specific values from the database, i.e. how
+the results can be filtered. The package uses the same filtering system than the
+=ensembldb= Bioconductor package and extends it by some additional filters.
+The following filter classes are used by the package (in alphabetical order):
+
++ =EntrezidFilter=: filter the results based on the target genes' NCBI
+  Entrezgene identifiers.
++ =ExperimentFilter=: restrict the results to specific experiments (use
+  =listExperiments(mirtarbase)= to get a list of all experiments).
++ =GenenameFilter=: filter the results based on the target genes' names
+  (symbols).
++ =MatmirnaFilter=: search for MTIs for specific mature miRNA names
+  (e.g. /hsa-miR-15b-5p/).
++ =MarmirnaidFilter=: search for MTIs for specific mature miRNAs identified by
+  their mirbase accession number.
++ =MirfamFilter=: filter the results based on miRNAs of specific miRNA families.
++ =MirfamidFilter=: filter the results based on miRNAs of specific miRNA
+  families identified by their mirbase accession number.
++ =PremirnaFilter=: filter the results for MTIs of mature miRNAs derived from
+  the specified pre-miRNA(s).
++ =PremirnaidFilter=: filter the results for MTIs of mature miRNAs derived from
+  the specified pre-miRNA(s) identified by their mirbase accession number.
++ =PublicationFilter=: filter the results based on the publication (identified
+  by their Pubmed IDs) in which the MTI was described.
++ =SpeciesFilter=: filter the results for target genes or miRNAs of the
+  specified species (use =listSpecies(mirtarbase, "gene")= or
+  =listSpecies(mirtarbase, "mirna")=).
++ =SupportTypeFilter=: filter the results based on the evidence/support type of
+  the MTI (use =listSupportTypes(mirtarbase)= to get a list of allowed values
+  for support type).
+
+These filters can be used individually or can be combined to generate more
+specific queries. Furthermore, the parameter =condition= allows some more
+flexibility to choose which entries should be fetched. =condition= can take the
+following values: ===, =!==, =like=, =not like= with the latter two allowing
+partial matching. In addition, each filter can take a single or multiple values
+(see examples in the next section).
+
+** Get miRNA-target gene interactions for a specific gene
+
+As an example we want to retrieve all MTIs for the gene /BCL2/, i.e. we want to
+get all (mature) miRNAs that have been shown to target this gene. To this end we
+define a =GenenameFilter= with the value =BCL2= and submit this to the =mtis=
+call. As a result we get a =MTIList=, which is essentially a =list= of =MTI=
+objects that describe the interaction. Each interaction is defined by the mature
+miRNA name and the name of the target gene (accessible through the =matmirna=
+and =gene= methods, respectively) as well as the collection of evidences for the
+interaction. These evidences, or rather publications, are accessible through the
+=reports= method and specify by which experimental methods the interaction was
+validated and in which publication this interaction has been described. The
+curators of the miRTarbase manually assigned each evidence one of four /support
+types/ which is accessible through the =supportedBy= method.
+
+The code below simply fetches all MTIs for the gene /BCL2/ from the database.
+
+#+BEGIN_SRC R
+  ## query the database to featch all MTIs for gene BCL2
+  BCL2 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2")))
+  BCL2
+
+  ## to print some more information on a single MTI
+  BCL2[[1]]
+
+  ## how many mature miRNAs did we get?
+  length(BCL2)
+
+  ## these are however of all species, since the query is by default case insensitive
+  sort(table(mirnaSpecies(BCL2)), decreasing=TRUE)
+#+END_SRC
+
+In order to restrict the MTIs to human genes and human miRNAs it is advisable to
+add one or more =SpeciesFilter= to the query.
+
+#+BEGIN_SRC R
+  ## we can use the listSpecies method to get the names of all supported species
+  ## from the database:
+  sort(listSpecies(mirtarbase))
+
+  ## we want to get all human mature miRNAs that target human gene BCL2
+  BCL2 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"),
+                                SpeciesFilter("Homo sapiens", feature="gene"),
+                                SpeciesFilter("Homo sapiens", feature="mirna")))
+
+  ## now we have only human miRNAs. We can now make a table of the miRNA,
+  ## the support type and the number of publications for each MTI
+  BCL2.df <- data.frame(miRNA=matmirna(BCL2),
+                        reports=reportCount(BCL2),
+                        support_type=unlist(lapply(supportedBy(BCL2), function(z){
+                            return(paste(unique(z), collapse=";"))
+                        })))
+
+  ## displaying the MTIs described by the most publications
+  head(BCL2.df[ order(BCL2.df$reports, decreasing=TRUE), ])
+#+END_SRC
+
+So, there is evidence that e.g. miR-16-5p is targeting the gene BCL2, along with
+miR-15a-5p. We can also enrich this table with the information of the
+pre-miRNA(s) in which the mature miRNA is encoded. In addition, we can group the
+miRNAs also by the miRNA family. Note that each mature miRNA can be eventually
+encoded in more than one pre-miRNA, each mature miRNA (and each pre-miRNA) is
+supposed to be part of one miRNA family.
+
+#+BEGIN_SRC R
+  BCL2.df <- cbind(BCL2.df,
+                   premirna=unlist(lapply(BCL2, function(z){
+                       return(paste(premirna(z), collapse=";"))
+                   })),
+                   mirfam=mirfam(BCL2))
+
+  ## Note: there are some mature miRNAs that can not be mapped to pre-miRNA
+  ## or mirfam names.
+  sum(is.na(as.character(BCL2.df$mirfam)))
+
+  ## the miRNA with most evidences (miR-16-5p) is actually encoded in two
+  ## precursors:
+  premirna(BCL2$MIRT001800)
+
+  ## The miRNA families from which most miRNAs target BCL2 are listed below:
+  sort(table(as.character(BCL2.df$mirfam)), decreasing=TRUE)
+
+  ## The miRNAs from the mir-15 family targeting BCL2 are
+  MTI.mir15 <- BCL2[ which(unlist(lapply(BCL2, mirfam))=="mir-15") ]
+  ## the mature miRNAs from this family:
+  MTI.mir15
+
+  matmirna(MTI.mir15)
+  ## the pre-miRNAs:
+  premirna(MTI.mir15)
+
+#+END_SRC
+
+The missing mapping of mature miRNAs to pre-miRNA names or mirfam identifiers
+observed above is in many instances caused by different mirbase versions on
+which the =mirbase.db= package and the miRTarbase bases. In addition, not all
+mature miRNAs are annotated to miRNA families.
+
+As we have seen above, we can use the methods =matmirna=, =premirna= and
+=mirfam= on =MTI= or =MTIList= objects to retrieve the mature miRNA involved in
+the miRNA-target gene interaction, the pre-miRNA in which the mature miRNA is
+encoded and the miRNA family to which the pre-miRNA(s) belong.
+
+
+** Get miRNA-target gene interactions for a miRNA
+
+Next we retrieve MTIs between miRNAs of the mir-15 family and genes which names
+start with /BCL2/. For this we define a =GenenameFilter= specifying
+=condition="like"=.
+
+#+BEGIN_SRC R
+  ## get all miRNA-target gene interactions betwee mature miRNAs from the
+  ## mir-15 family and genes starting with BCL2
+  BCLs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
+                                GenenameFilter("BCL2%", condition="like"),
+                                SpeciesFilter("Homo sapiens"))
+              )
+  BCLs
+#+END_SRC
+
+According to this information the miRNA /miR-195-5p/ targets both, a pro- and an
+anti-apoptotic member of the /BCL2/ gene family (/BCL2L11/ and /BCL2/,
+respectively).
+
+Also members of the /mir-17/ family have been reported to target genes from the
+/BCL2/ gene family, thus we retrieve next all MTIs between miRNAs of the miRNA
+families /mir-15/ or /mir-17/ and some of the genes from the BCL2 gene family, a
+gene family involved in, and regulating, the intrinsic apoptotic pathway.
+
+To retrieve values for more than one gene, respectively miRNA family, we can
+submit a character vector of the respective ids to the filters.
+
+#+BEGIN_SRC R
+  ## retrieving all MTIs between miRNAs from the mir-15 and mir-17 families
+  ## and some genes from the BCL2 gene family
+  BCLs <- mtis(mirtarbase,
+               filter=list(MirfamFilter(c("mir-15", "mir-17")),
+                   GenenameFilter(c("BCL2", "BCL2L11", "PMAIP1", "MCL1")),
+                   SpeciesFilter("Homo sapiens"))
+              )
+  BCLs
+  ## the miRNA - gene pairs:
+  data.frame(miRNA=matmirna(BCLs),
+             gene=gene(BCLs),
+             report_count=reportCount(BCLs))
+#+END_SRC
+
+Apparently, miRNAs from both the miR-15 and the miR-17 family target genes of
+the BCL2 gene family and are thus also involved in the regulation of the
+apoptotic pathway.
+
+Next we evaluate the evidence grades of the interaction and remove all MTIs that
+are not of the /Functional MTI/ support type (the type with the highest evidence
+grade).
+
+#+BEGIN_SRC R
+  funcMti <- unlist(lapply(BCLs, function(z){
+      return(any(supportedBy(z)=="Functional MTI"))
+  }))
+  sum(funcMti)
+  length(funcMti)
+
+  ## We could now use this logical vector to sub-set the list.
+  ## Alternatively, we can also re-perform the query and fetch only interactions of that
+  ## support type, which has the advantage that also only the publications of the
+  ## corresponding support type are loaded.
+  BCLs <- mtis(mirtarbase,
+                 filter=list(MirfamFilter(c("mir-15", "mir-17")),
+                     GenenameFilter(c("BCL2", "BCL2L11", "PMAIP1", "MCL1")),
+                     SpeciesFilter("Homo sapiens"),
+                     SupportTypeFilter("Functional MTI"))
+              )
+  ## the miRNA - gene pairs:
+  data.frame(miRNA=matmirna(BCLs),
+             gene=gene(BCLs),
+             report_count=reportCount(BCLs)
+            )
+#+END_SRC
+
+This considerably reduced the list of interactions and also decreased the number
+of reports per MTI.
+
+
+** Get grouped miRNA-target gene interactions
+
+Sometimes it might be useful to group the miRNA-target gene interactions by some
+factor, e.g. by genes or miRNAs. The method =mtisBy= allows to fetch =MTIs=
+grouped by any attribute from the database. It is possible to group the results
+by gene, (mature miRNA), entrezid, support type, Pubmed ID, pre-miRNA name,
+miRFam name or by species. The result will be a =list= with the names being the
+factor by which the interactions are grouped and each element being a =MTIList=
+of the MTIs.
+
+In the example below we fetch all MTIs for the genes /BCL2/, /BCL2L11/, /MCL1/
+and group them by miRNA family.
+
+#+BEGIN_SRC R
+  Filters <- list(SpeciesFilter(c("Homo sapiens")),
+                  GenenameFilter(c("BCL2", "BCL2L11", "MCL1")))
+
+  BCL2by <- mtisBy(mirtarbase, filter=Filters, by="mirfam")
+  head(BCL2by)
+#+END_SRC
+
+In a similar way we can also fetch the data grouped by gene.
+
+#+BEGIN_SRC R
+  BCL2by <- mtisBy(mirtarbase, filter=Filters, by="gene")
+  BCL2by
+
+#+END_SRC
+
+
+** Alternative way to fetch data from the database
+
+By default, the =mtis= method returns a list of =MTI= objects (=MTIList=) which
+is sufficient for most use cases. Alternatively, however, the =mtis= method can
+also return the results as a =data.frame=. In addition to a significant
+performance improvement this also enables to select only specific attributes
+from the database. Note however that by default the method returns all
+attributes from the database which results in a =data.frame= with one
+MTI-publication per row, i.e. the same MTI represented by the miRNA-gene pair
+can be present in many rows of this =data.frame= depending in how many
+publications this interaction was identified.
+
+#+BEGIN_SRC R
+  ## We perform the same call as above, but restrict the information to some selected
+  ## attributes and specify to return the results as a data.frame rather than a list
+  ## of MTI objects.
+  BCLs.df <- mtis(mirtarbase,
+                  filter=list(MirfamFilter(c("mir-15", "mir-17")),
+                      GenenameFilter(c("BCL2", "BCL2L11", "PMAIP1", "MCL1")),
+                      SpeciesFilter("Homo sapiens"),
+                      SupportTypeFilter("Functional MTI")),
+                  attrs=c("mirna", "target_gene"),
+                  return.type="data.frame")
+
+  BCLs.df
+#+END_SRC
+
+
+
+** Conversions between miRNA identifiers
+
+The =mirtarbase= package provides also methods and functions that allow to map
+mature miRNAs to their precursors or to miRNA families. These functions are
+essentially wrapper functions that use the information of the =mirbase.db=
+Bioconductor package for the conversion. However, since the =mirtarbase= and
+=mirbase.db= functions might provide information from different releases, some
+of the mappings might not be available. For a complete list of conversion
+function refer to the help page of the e.g. =premirna2matmirna= function.
+
+#+BEGIN_SRC R
+  ## map from pre-miRNA name to mature miRNA name. The function returns by default
+  ## a data.frame
+  premirna2matmirna(c("hsa-mir-16-1", "hsa-mir-16-2"))
+
+  ## the same information but as a list:
+  premirna2matmirna(c("hsa-mir-16-1", "hsa-mir-16-2"), return.type="list")
+#+END_SRC
+
+
+* Database layout<<section.database.layout>>
+
+The database consists of a single table, =mirtarbase= which contains all
+information stored in the xls file from the miRTarbase web site. The column
+names and their properties are listed below. Each line in the table represents
+the MTI for a miRNA and one of its target genes as reported in a
+publication. Thus, an interaction between a miRNA and its target gene can be
+listed in more than one row, depending on the number of publications it was
+validated.
+
++ =mirtarbase_id=: identifier for the miRNA target gene interaction (MTI). Note
+  that this ID is not unique, i.e. MTIs reported in several publications have
+  the same ID but are listed in several rows of the table.
++ =mirna=: mature miRNA name (a.k.a miRNA ID, e.g. /hsa-miR-20a-5p/).
++ =species_mirna=: the species of the miRNA (e.g. /Homo sapiens/).
++ =target_gene=: the official gene name (symbol) for the gene (e.g. /DUSP6/, or
+  /ush/).
++ =target_gene_entrez_gene_id=: the NCBI Entrezgene ID for the target gene;
+  either =NA= or the (numerical) Entrezgene ID. Contains only unique values, no
+  multiple IDs collapsed by any separator.
++ =species_target_gene=: the species of the target gene.
++ =experiments=: the experiments providing the evidence for the interaction as
+  reported in one publication.
++ =support_type=: the different types of support (from weak to strong).
++ =references_pmid=: the Pubmed ID of the publication reporting the MTI. Each
+  line with a single Pubmed ID, no empty (=NA=) values.
+
+
+* References
+
