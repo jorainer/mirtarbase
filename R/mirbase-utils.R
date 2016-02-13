@@ -83,6 +83,8 @@ matmirna2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="d
 ## CAVE: If we really want to use "like" and ignore.case:
 ## o The ifnotfound mapping has to be revised.
 ## o The re-ordering of the results has to be adapted.
+## Ideas:
+## - if condition "like" it makes no sense to return results in the correct order.
 pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
                     mat="mature_name", return.type="data.frame", ignore.case=FALSE){
     if(ignore.case){
@@ -125,34 +127,41 @@ pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
                     " where ", pre," ", condition, " ", x, nocase)
     }
     Res <- dbGetQuery(mirbase.con(), Q)
-    return(Res)
     ## add NA rows for x if not found:
-    notfound <- unique(x.orig[ !(x.orig %in% Res[ , pre ]) ])
+    notfound <- unique(x.orig[!(x.orig %in% Res[, pre])])
     if(length(notfound) > 0){
         tmp <- data.frame(notfound, rep(ifnotfound, length(notfound)))
         colnames(tmp) <- c(pre, mat)
         Res <- rbind(Res, tmp)
     }
-    ## want to preserve the input ordering...
-    ##idx <- match(Res[ , pre ], x.orig)
-    ##Res <- Res[ order(idx), ]
-    ##idx <- match(x.orig, Res[ , pre ])
-    ##Res <- Res[ idx, ]
-    ##if(return.type=="list")
-    ##    Res <- split(Res[ , mat ], f=Res[ , pre ])
-    ##return(Res)
-    ## didn't work... try this:
-    if(return.type=="list"){
-        Res <- split(Res[ , mat ], Res[ , pre ])
-        Res <- Res[ x.orig ]
-        return(Res)
+    ## Want to preserve the input ordering...
+    ## but only if condition is not "like", "=" or "!="
+    if(condition == "like" | condition == "=" | condition == "!="){
+        ## Remove the pattern from the result, if we've got more than 1 row, since
+        ## in that case we've also got some "real" results.
+        if(condition == "like"){
+            if(nrow(Res) > 1)
+                Res <- Res[Res[, pre] != x.orig, , drop=FALSE]
+        }
+        if(return.type == "list"){
+            return(split(Res[, mat], Res[, pre]))
+        }else{
+            return(Res)
+        }
     }else{
-        Res <- split(Res, Res[ , pre ])
-        ## order
-        Res <- Res[ x.orig ]
-        Res <- do.call(rbind, Res)
-        rownames(Res) <- NULL
-        return(Res)
+        ## Try to preserve ordering.
+        if(return.type == "list"){
+            Res <- split(Res[, mat], Res[, pre])
+            Res <- Res[x.orig]
+            return(Res)
+        }else{
+            Res <- split(Res, Res[, pre])
+            ## order
+            Res <- Res[x.orig]
+            Res <- do.call(rbind, Res)
+            rownames(Res) <- NULL
+            return(Res)
+        }
     }
 }
 

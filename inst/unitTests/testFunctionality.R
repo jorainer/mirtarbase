@@ -40,8 +40,23 @@ test_mtis <- function(){
 }
 
 test_premirna2matmirna <- function(){
-    premirna2matmirna("hsa-miR-181%", condition="like")
-    premirna2matmirna("hsa-mir-181%", condition="like")
+    detach("package:mirtarbase", unload=TRUE)
+    library(mirtarbase)
+    tmp <- premirna2matmirna("hsa-miR-181%", condition="like")
+    ## For like we want to get many rows.
+    checkTrue(nrow(tmp) > 1)
+    tmp2 <- premirna2matmirna("hsa-mir-181%", condition="like")
+    ## And it shouldn't matter wheter we're case sensitive or not.
+    checkEquals(tmp, tmp2)
+
+    ## We don't want to have the pattern in the results too.
+    checkTrue(!any(tmp$mirna_id == "hsa-miR-181%"))
+
+    ## If we don't find anything, we expect to get NA
+    tmp <- premirna2matmirna("asdfdsf", condition="like")
+    checkEquals(as.character(tmp[1, 1]), "asdfdsf")
+
+    ## LLLL go on here.
 
     ## Assume we're using case insensitive queries here!
     premirna2matmirna("hsa-mir-181a-2")

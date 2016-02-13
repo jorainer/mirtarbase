@@ -469,5 +469,11 @@ In that case =columns= is ignored.
   + Due to the =ifnotfound= that checks that result ids match input ids!
   + Due to the /keep ordering/ behavior.
 
+** TODO Use some consistency in the mirna naming
+
+Column names from mirbase are misleading. Eventually map =mirna_id= to
+=premirna_name=, =mature_name= to =matmirna_name= etc.
+
+
 * References
 
