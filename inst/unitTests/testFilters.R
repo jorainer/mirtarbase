@@ -108,6 +108,14 @@ test_SpeciesFilter <- function(){
     suppressWarnings(
         where(SFilt, mirtarbase)
     )
+
+    ## where has to be the same for "Homo sapiens" and "Homo_sapiens",
+    ## if we're using a mirtarbase.
+    A <- SpeciesFilter("Homo sapiens")
+    B <- SpeciesFilter("Homo_sapiens")
+    checkTrue(where(A) != where(B))
+    checkTrue(where(A, mirtarbase) == where(B, mirtarbase))
+
     ## obviously only values present in the database make sense:
     listSpecies(mirtarbase, "gene")
     listSpecies(mirtarbase, "mirna")

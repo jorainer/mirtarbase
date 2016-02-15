@@ -7,6 +7,11 @@ SIGNIFICANT USER-VISIBLE CHANGES
     o Renamed listAttributes method to listColumns
     o Use case insensitive queries to map between mature miRNAs,
       pre-miRNAs and miRNA families.
+    o premirna2matmirna and other functions that use mirbase.db to map between
+      ids: condition="like" fixed.
+    o SpeciesFilter internally replaces all "_" by " ", as organisms are encoded in
+      the mirtarbase without the "_".
+    o Fixed all man pages.
 
 BUG FIXES
     o Fixed RUnit tests

@@ -327,7 +327,7 @@ setMethod("entrezid", "MTI",
           })
 setMethod("experiments", "MTI",
           function(object, ...){
-              return(unlist(lapply(reports(object), experiments)))
+              return(unlist(lapply(reports(object), experiments), use.names=FALSE))
           })
 setMethod("gene", "MTI",
           function(object, ...){
@@ -351,7 +351,7 @@ setMethod("mirnaSpecies", "MTI",
           })
 setMethod("pmid", "MTI",
           function(object, ...){
-              return(unlist(lapply(reports(object), pmid)))
+              return(unlist(lapply(reports(object), pmid), use.names=FALSE))
           })
 setMethod("reportCount", "MTI",
           function(object, ...){
@@ -368,7 +368,7 @@ setMethod("reports", "MTI",
           )
 setMethod("supportedBy", "MTI",
           function(object, ...){
-              return(unlist(lapply(reports(object), supportedBy)))
+              return(unlist(lapply(reports(object), supportedBy), use.names=FALSE))
           })
 ## methods that convert mature miRNA ids to pre-miRNA, mirfam etc ids
 ## Note: this will only work well if the mirbase version from mirtarbase
@@ -607,6 +607,8 @@ setMethod("where", signature(object="SpeciesFilter", db="MirtarbaseDb"),
                        " either \"gene\" or \"mirna\"!")
               allspecies <- unique(c(listSpecies(db, "gene"), listSpecies(db, "mirna")))
               Vals <- object@value
+              ## Replace all "_" with " "
+              Vals <- gsub(Vals, pattern="_", replacement=" ", fixed=TRUE)
               notthere <- Vals[ !(Vals %in% allspecies) ]
               object@value <- Vals
               if(length(notthere) > 0){

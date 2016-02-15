@@ -18,7 +18,7 @@
 \alias{reportCount,MTI-method}
 \alias{reports,MTI-method}
 \alias{reports<-,MTI,list-method}
-\alias{reports<-,MTI,Report-method}
+\alias{reports<-,MTI,MTIReport-method}
 \alias{show,MTI-method}
 \alias{supportedBy,MTI-method}
 \alias{entrezid}
@@ -63,7 +63,7 @@
     }
 
     \item{\code{report}}{
-      A list of \code{\linkS4class{Report}} objects
+      A list of \code{\linkS4class{MTIReport}} objects
       providing the evidence for the miRNA target gene interaction.
     }
 
@@ -89,89 +89,89 @@
 \section{Methods}{
   \describe{
 
-    \item{\code{as.data.frame( x, collapse.reports=NULL,
-	stringsAsFactors=getOption( "stringsAsFactors", TRUE ), ... )}}{
+    \item{\code{as.data.frame(x, collapse.reports=NULL,
+	stringsAsFactors=getOption("stringsAsFactors", TRUE), ...)}}{
       Casts the \code{MTI} object into a \code{data.frame}. If
 	\code{collapse.reports} is not \code{NULL}, the values from the
-	internal \code{Report} classes will be collapsed (separated by
+	internal \code{MTIReport} classes will be collapsed (separated by
 	the value of \code{collapse.reports}) resulting in a
 	\code{data.frame} with a single row for the \code{MTI}
 	object. Otherwise, the \code{data.frame} will have as many rows
-	as there are \code{Report} objects in the \code{MTI} object.
+	as there are \code{MTIReport} objects in the \code{MTI} object.
     }
 
-    \item{\code{entrezid( object, ... )}}{
+    \item{\code{entrezid(object, ...)}}{
       Returns the NCBI Entrezgene identifier of the target gene.
     }
 
-    \item{\code{experiments( object, ... )}}{
+    \item{\code{experiments(object, ...)}}{
       Returns the experiments
       that were performed to proof the interaction.
     }
 
-    \item{\code{gene( object, ... )}}{
+    \item{\code{gene(object, ...)}}{
       Returns the official symbol of the target gene.
     }
 
-    \item{\code{geneSpecies( object, ... )}}{
+    \item{\code{geneSpecies(object, ...)}}{
       Returns the species of the target gene.
     }
 
-    \item{\code{id( object, ... )}}{
+    \item{\code{id(object, ...)}}{
       Returns the identifier.
     }
 
-    \item{\code{matmirna( object, ... )}}{
+    \item{\code{matmirna(object, ...)}}{
       Returns the name of the mature miRNA.
     }
 
-    \item{\code{mirnaSpecies( object, ... )}}{
+    \item{\code{mirnaSpecies(object, ...)}}{
       Returns the species of the miRNA.
     }
 
-    \item{\code{pmid( object, ... )}}{
+    \item{\code{pmid(object, ...)}}{
       Returns the PubMed identifier(s) of the
       publications providing evidence of the interaction.
     }
 
-    \item{\code{reportCount( object, ... )}}{
+    \item{\code{reportCount(object, ...)}}{
       Returns the number of publications/reports providing evidence for
       the interaction.
     }
 
-    \item{\code{reports( x, ... )}, \code{reports( x ) <- value}}{
+    \item{\code{reports(x, ...)}, \code{reports(x) <- value}}{
       Getter and setter method of the \code{report} slot. Returns a list
-      of \code{\linkS4class{Report}} objects; \code{value} should be a
-      list of \code{\linkS4class{Report}} objects or a single object.
+      of \code{\linkS4class{MTIReport}} objects; \code{value} should be a
+      list of \code{\linkS4class{MTIReport}} objects or a single object.
     }
 
-    \item{\code{show( object )}}{
+    \item{\code{show(object)}}{
       Print the content of the MTI class.
     }
 
-    \item{\code{supportedBy( object, ... )}}{
+    \item{\code{supportedBy(object, ...)}}{
       Returns the support type of the evidence/experiments.
     }
 
     Retrieve annotations (from the \code{mirbase.db} package) for the mature
     miRNA.
 
-    \item{\code{matmirnaId( object, ... )}}{
+    \item{\code{matmirnaId(object, ...)}}{
       Returns the identifier (accession) of the mature miRNA from the
       mirbase.
     }
 
-    \item{\code{premirna( object, ... )}}{
+    \item{\code{premirna(object, ...)}}{
       Returns the pre-miRNA name (i.e. the miRNA id) for the mature
       miRNA from the mirbase.
     }
 
-    \item{\code{premirnaId( object, ... )}}{
+    \item{\code{premirnaId(object, ...)}}{
       Returns the pre-miRNA accession for the mature miRNA from the
       mirbase.
     }
 
-    \item{\code{mirfam( object, ... )}}{
+    \item{\code{mirfam(object, ...)}}{
       Returns the miRNA family name for the mature miRNA from the
       mirbase.
     }
@@ -184,42 +184,42 @@
   Instead of directly accessing the slots of the class, the getter methods listed above should be used.
 }
 \seealso{
-	\code{\linkS4class{Report}}
+	\code{\linkS4class{MTIReport}}
 }
 \examples{
 
 ## get an MTI from the database that represents an interaction
 ## between the gene BCL2L11 and miRNAs from the mir-17 family.
-BCL2L11 <- mtis( mirtarbase, filter=list( GenenameFilter( "BCL2L11" ), MirfamFilter( "mir-17" ) ) )
+BCL2L11 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2L11"), MirfamFilter("mir-17")))
 BCL2L11 <- BCL2L11[[1]]
 BCL2L11
 
 ## what's the mature miRNA?
-matmirna( BCL2L11 )
+matmirna(BCL2L11)
 ## what's the precursor of this miRNA
-premirna( BCL2L11 )
+premirna(BCL2L11)
 
 ## the gene name and the Entrezgene ID?
-gene( BCL2L11 )
-entrezid( BCL2L11 )
+gene(BCL2L11)
+entrezid(BCL2L11)
 
 ## on how many reports (publications) does this base?
-reportCount( BCL2L11 )
+reportCount(BCL2L11)
 
 ## what evidence/support types?
-supportedBy( BCL2L11 )
+supportedBy(BCL2L11)
 
 ## what experiments:
-experiments( BCL2L11 )
+experiments(BCL2L11)
 
 ## list the reports:
-reports( BCL2L11 )
+reports(BCL2L11)
 
 ## cast the MTI object into a data.frame
-as.data.frame( BCL2L11 )
+as.data.frame(BCL2L11)
 
 ## into a single row data.frame
-as.data.frame( BCL2L11, collapse.reports=";" )
+as.data.frame(BCL2L11, collapse.reports=";")
 
 }
 \keyword{classes}

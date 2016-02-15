@@ -7,39 +7,66 @@
 \alias{SupportTypeFilter-class}
 % defined in ensembldb
 \alias{column,EntrezidFilter,MirtarbaseDb-method}
+\alias{column,EntrezidFilter,MirtarbaseDb,ANY-method}
 \alias{where,EntrezidFilter,MirtarbaseDb-method}
+\alias{where,EntrezidFilter,MirtarbaseDb,ANY-method}
 \alias{column,GenenameFilter,MirtarbaseDb-method}
+\alias{column,GenenameFilter,MirtarbaseDb,ANY-method}
 \alias{where,GenenameFilter,MirtarbaseDb-method}
+\alias{where,GenenameFilter,MirtarbaseDb,ANY-method}
 % defined in mirnahostgenes
 \alias{column,MatmirnaFilter,MirtarbaseDb-method}
+\alias{column,MatmirnaFilter,MirtarbaseDb,ANY-method}
 \alias{where,MatmirnaFilter,MirtarbaseDb-method}
+\alias{where,MatmirnaFilter,MirtarbaseDb,ANY-method}
 \alias{column,MatmirnaidFilter,MirtarbaseDb-method}
+\alias{column,MatmirnaidFilter,MirtarbaseDb,ANY-method}
 \alias{where,MatmirnaidFilter,MirtarbaseDb-method}
+\alias{where,MatmirnaidFilter,MirtarbaseDb,ANY-method}
 \alias{column,MirfamFilter,MirtarbaseDb-method}
+\alias{column,MirfamFilter,MirtarbaseDb,ANY-method}
 \alias{where,MirfamFilter,MirtarbaseDb-method}
+\alias{where,MirfamFilter,MirtarbaseDb,ANY-method}
 \alias{column,MirfamidFilter,MirtarbaseDb-method}
+\alias{column,MirfamidFilter,MirtarbaseDb,ANY-method}
 \alias{where,MirfamidFilter,MirtarbaseDb-method}
+\alias{where,MirfamidFilter,MirtarbaseDb,ANY-method}
 \alias{column,PremirnaFilter,MirtarbaseDb-method}
+\alias{column,PremirnaFilter,MirtarbaseDb,ANY-method}
 \alias{where,PremirnaFilter,MirtarbaseDb-method}
+\alias{where,PremirnaFilter,MirtarbaseDb,ANY-method}
 \alias{column,PremirnaidFilter,MirtarbaseDb-method}
+\alias{column,PremirnaidFilter,MirtarbaseDb,ANY-method}
 \alias{where,PremirnaidFilter,MirtarbaseDb-method}
+\alias{where,PremirnaidFilter,MirtarbaseDb,ANY-method}
 % defined in mirtarbase
 \alias{column,ExperimentFilter,MirtarbaseDb-method}
 \alias{column,PublicationFilter,MirtarbaseDb-method}
 \alias{column,SpeciesFilter,MirtarbaseDb-method}
 \alias{column,SupportTypeFilter,MirtarbaseDb-method}
+\alias{column,ExperimentFilter,MirtarbaseDb,ANY-method}
+\alias{column,PublicationFilter,MirtarbaseDb,ANY-method}
+\alias{column,SpeciesFilter,MirtarbaseDb,ANY-method}
+\alias{column,SupportTypeFilter,MirtarbaseDb,ANY-method}
 \alias{where,ExperimentFilter,MirtarbaseDb-method}
 \alias{where,PublicationFilter,MirtarbaseDb-method}
+\alias{where,ExperimentFilter,MirtarbaseDb,ANY-method}
+\alias{where,PublicationFilter,MirtarbaseDb,ANY-method}
 \alias{show,SpeciesFilter,MirtarbaseDb-method}
 \alias{show,SpeciesFilter-method}
 \alias{where,SpeciesFilter,MirtarbaseDb-method}
 \alias{where,SupportTypeFilter,MirtarbaseDb-method}
+\alias{where,SpeciesFilter,MirtarbaseDb,ANY-method}
+\alias{where,SupportTypeFilter,MirtarbaseDb,ANY-method}
+\alias{where,BasicFilter,MirtarbaseDb,ANY-method}
 \alias{column}
 \alias{where}
 
 \title{Filter results fetched from the miRTarbase database}
 \description{
-  These classes allow to specify which entries should be retrieved from the database.
+  These classes allow to specify which entries should be retrieved from
+  the database. The filters defined here extend the filters from the
+  \code{ensembldb} Bioconductor package.
 }
 \section{Objects from the Class}{
   While objects can be created by calls e.g. of the form
@@ -82,9 +109,13 @@
   }
 }
 \section{Extends}{
-Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
+  Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
 }
 \section{Methods}{
+
+  (in alphabetic order)
+  All methods are applicable to all filter classes extending the \code{BasicFilter}.
+
   \describe{
 
     \item{column}{
@@ -95,17 +126,32 @@ Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
       \code{ensembldb} packages.
     }
 
+    \item{condition}{\code{signature="ExperimentFilter",db="MirtarbaseDb"}
+      Returns the \emph{condition} of the filter.
+    }
+
+    \item{condition<-}{
+      Allows to set/change the condition of the filter.
+    }
+
     \code{show}{
       Print some information about the object.
     }
 
+    \item{value}{\code{signature(object="ExperimentFilter", db="MirtarbaseDb")}:
+      returns value of the filter.
+    }
+
+    \item{value<-}{
+      Allows to set/change the value of the filter.
+    }
+
     \item{where}{
       \code{signature(object = "ExperimentFilter", db = "MirtarbaseDb")}: returns the
-      where clause for the SQL call to the miRTarbase database. The method can be applied to any
+      \emph{where} clause for the SQL call to the miRTarbase database. The method can be applied to any
       filter class defined in the \code{mirtarbase}, \code{mirnahostgenes} or
       \code{ensembldb} packages.
     }
-
   }
 }
 \details{
@@ -114,58 +160,58 @@ Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
   The complete list of allowed filters is (in alphabetic order):
   \describe{
 
-    \item{\code{EntrezidFilter}}{
+    \item{EntrezidFilter}{
       Filter the results for specific NCBI Entrezgene IDs.
     }
 
-    \item{\code{ExperimentFilter}}{
+    \item{ExperimentFilter}{
       Restrict the results to specific experiments. See
       \code{\link{listExperiments}} for a full list of supported
       experiments.
     }
 
-    \item{\code{GenenameFilter}}{
+    \item{GenenameFilter}{
       Restrict the results to specific genes based on their name/symbol.
     }
 
-    \item{\code{MatmirnaFilter}}{
+    \item{MatmirnaFilter}{
       Restrict the results to specified mature miRNA names.
     }
 
-    \item{\code{MatmirnaidFilter}}{
+    \item{MatmirnaidFilter}{
       Restrict the results to specified mature miRNA accession IDs.
     }
 
-    \item{\code{MirfamFilter}}{
+    \item{MirfamFilter}{
       Restrict the results to interactions of miRNAs from the specified
       miRNA family.
     }
 
-    \item{\code{MirfamidFilter}}{
+    \item{MirfamidFilter}{
       Restrict the results to interactions of miRNAs from the specified
       miRNA family (ID/accession).
     }
 
-    \item{\code{PremirnaFilter}}{
+    \item{PremirnaFilter}{
       Restrict the results to interactions of mature miRNAs derived from
       the specified pre-miRNAs (identified by their name).
     }
 
-    \item{\code{PremirnaidFilter}}{
+    \item{PremirnaidFilter}{
       Restrict the results to interactions of mature miRNAs derived from
       the specified pre-miRNAs (identified by their accession).
     }
 
-    \item{\code{PublicationFilter}}{
+    \item{PublicationFilter}{
       Restrict the results to MTIs validated in the specified
       publications (identified by their PubMed IDs).
     }
 
-    \item{\code{SpeciesFilter}}{
+    \item{SpeciesFilter}{
       Restrict the results to miRNAs or target genes from the specified species.
     }
 
-    \item{\code{SupportTypeFilter}}{
+    \item{SupportTypeFilter}{
       Restrict the results to MTIs with specified support type/evidence
       level. Use the method \code{\link{listSupportTypes}} to get a list
       of available support types.
@@ -186,7 +232,9 @@ Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
   and \code{MirfamidFilter} instances internally map the provided
   identifier to the corresponding mature miRNA names using the
   \code{mirbase.db} package (e.g. using the
-  \code{\link{premirna2matmirna}} function).
+  \code{\link{premirna2matmirna}} function). Note however that some
+  mapping might not be \emph{up-to-date}, since the \code{mirbase.db}
+  package is not updated regularily.
 }
 \author{
   Johannes Rainer

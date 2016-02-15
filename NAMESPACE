@@ -10,7 +10,7 @@ importFrom(parallel, mclapply)
 importClassesFrom(ensembldb, BasicFilter, GenenameFilter, EntrezidFilter)  ## filters
 importFrom(ensembldb, GenenameFilter, EntrezidFilter)
 importMethodsFrom(ensembldb, where, listColumns,
-                  listTables, condition)
+                  listTables, condition, value, "value<-", "condition<-")
 importClassesFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
                   MatmirnaidFilter, MirfamFilter, MirfamidFilter)  ## filters
 importFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
@@ -25,11 +25,13 @@ exportClasses(MirtarbaseDb, MTIReport, MTI, ExperimentFilter, PublicationFilter,
               SpeciesFilter, SupportTypeFilter, MTIList)
 ## methods for MirtarbaseDb:
 exportMethods(dbconn, show, listColumns, column, listExperiments, listPmids,
-              listSpecies, listSupportTypes, mtis, mtisBy, show, listTables, version)
+              listSpecies, listSupportTypes, mtis, mtisBy, listTables, version)
 ## methods for MTI and Report classes
 exportMethods(as.data.frame, entrezid, experiments, gene, geneSpecies,
               id, matmirna, matmirnaId, mirfam, mirnaSpecies, pmid, premirna, premirnaId,
               reportCount, reports, "reports<-", supportedBy)
+## methods for Filters
+exportMethods(where, column, condition, value, "value<-", "condition<-")
 export(ExperimentFilter, PublicationFilter, SpeciesFilter, SupportTypeFilter, MTIList)
 ## export mirbase conversion functions from pre-miRNA to mature miRNAs
 export(premirna2matmirna, premirna2matmirnaAcc, premirnaAcc2matmirnaAcc,

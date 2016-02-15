@@ -5,10 +5,10 @@ Version: 0.99.1
 Author: J. Rainer
 Maintainer: Johannes Rainer <johannes.rainer@eurac.edu>
 URL: https://github.com/jotsetung/mirtarbase
-Depends: ensembldb, mirhostgenes, S4Vectors
+Depends: methods, ensembldb, mirhostgenes, S4Vectors
 Imports: mirbase.db, BiocGenerics, RSQLite, methods, DBI, AnnotationDbi, parallel,
 	 utils
-Suggests: BiocStyle, knitr, rmarkdown, RUnit
+Suggests: BiocStyle, knitr, RUnit, rmarkdown
 VignetteBuilder: knitr
 biocViews: Annotation, miRNA
 Description: This package provides the validated miRNA-target interaction data from the
@@ -16,6 +16,9 @@ Description: This package provides the validated miRNA-target interaction data f
 	     information.
 Collate: Generics.R Classes.R Methods.R dbhelpers.R utils.R mirbase-utils.R
 	 convertfunctions.R zzz.R
-License: LGPL
+License: MIT + file LICENSE
+Copyright: miRTarBase data: ISBLab, Department of Biological Science and Technology,
+	   Institute of Bioinformatics and Systems Biology, National Chiao Tung
+	   University, Hsinchu, Taiwan
 NeedsCompilation: no
 

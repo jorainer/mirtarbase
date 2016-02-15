@@ -83,8 +83,6 @@ matmirna2matmirnaAcc <- function(x, condition="=", ifnotfound=NA, return.type="d
 ## CAVE: If we really want to use "like" and ignore.case:
 ## o The ifnotfound mapping has to be revised.
 ## o The re-ordering of the results has to be adapted.
-## Ideas:
-## - if condition "like" it makes no sense to return results in the correct order.
 pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
                     mat="mature_name", return.type="data.frame", ignore.case=FALSE){
     if(ignore.case){
@@ -146,7 +144,7 @@ pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
         if(return.type == "list"){
             return(split(Res[, mat], Res[, pre]))
         }else{
-            return(Res)
+            return(.fixColNames(Res))
         }
     }else{
         ## Try to preserve ordering.
@@ -160,7 +158,7 @@ pre2mat <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
             Res <- Res[x.orig]
             Res <- do.call(rbind, Res)
             rownames(Res) <- NULL
-            return(Res)
+            return(.fixColNames(Res))
         }
     }
 }
@@ -268,12 +266,19 @@ pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
         colnames(tmp) <- c(pre, fam)
         Res <- rbind(Res, tmp)
     }
-    ## want to preserve the input ordering...
-    ##idx <- match(Res[ , pre ], x.orig)
-    ##Res <- Res[ order(idx), ]
-    ##idx <- match(x.orig, Res[ , pre ])
-    ##Res <- Res[ idx, ]
-    ## didn't work... try this:
+    ## Want to preserve the input ordering, but only of condition is not "like", "="
+    ## or "!=".
+    if(condition %in% c("like", "=", "!=")){
+        if(condition == "like"){
+            if(nrow(Res) > 1)
+                Res <- Res[Res[, pre] != x.orig, , drop=FALSE]
+        }
+        if(return.type == "list"){
+            return(split(Res[, fam], Res[, pre]))
+        }else{
+            return(.fixColNames(Res))
+        }
+    }
     if(return.type=="list"){
         Res <- split(Res[ , fam ], Res[ , pre ])
         Res <- Res[ x.orig ]
@@ -284,11 +289,8 @@ pre2fam <- function(x, condition="=", ifnotfound=NA, pre="mirna_id",
         Res <- Res[ x.orig ]
         Res <- do.call(rbind, Res)
         rownames(Res) <- NULL
-        return(Res)
+        return(.fixColNames(Res))
     }
-    ##    if(return.type=="list")
-    ##    Res <- split(Res[ , fam ], f=Res[ , pre ])
-    ##return(Res)
 }
 
 
@@ -380,16 +382,18 @@ mat2fam <- function(x, condition="=", ifnotfound=NA, mat="mature_name",
         colnames(tmp) <- c(mat, fam)
         Res <- rbind(Res, tmp)
     }
-    ## want to preserve the input ordering...
-    ##idx <- match(Res[ , mat ], x.orig)
-    ##Res <- Res[ order(idx), ]
-    ##idx <- match(x.orig, Res[ , mat ])
-    ##Res <- Res[ idx, ]
-    ##rownames(Res) <- NULL
-    ##if(return.type=="list")
-    ##    Res <- split(Res[ , fam ], f=Res[ , mat ])
-    ##return(Res)
-    ## didn't work... try this:
+    if(condition %in% c("like", "=", "!=")){
+        if(condition == "like"){
+            if(nrow(Res) > 1)
+                Res <- Res[Res[, mat] != x.orig, , drop=FALSE]
+        }
+        if(return.type == "list"){
+            return(split(Res[, fam], Res[, mat]))
+        }else{
+            return(.fixColNames(Res))
+        }
+    }
+    ## Want to preserve ordering.
     if(return.type=="list"){
         Res <- split(Res[ , fam ], Res[ , mat ])
         Res <- Res[ x.orig ]
@@ -400,8 +404,17 @@ mat2fam <- function(x, condition="=", ifnotfound=NA, mat="mature_name",
         Res <- Res[ x.orig ]
         Res <- do.call(rbind, Res)
         rownames(Res) <- NULL
-        return(Res)
+        return(.fixColNames(Res))
     }
 }
 
-
+####============================================================
+##  .fixColNames
+##
+##  Function that renames columns from mirbase naming scheme to
+##  a more main-streamed naming.
+##  Note: is at present only a placeholder
+####------------------------------------------------------------
+.fixColNames <- function(x){
+    return(x)
+}

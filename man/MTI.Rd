@@ -19,7 +19,7 @@ MTI( id="", mature_mirna="", species_mirna="", query="", target_gene="", target_
   \item{target_gene_entrezid}{the NCBI Entrezgene identifier of the
     target gene.}
   \item{species_target_gene}{the species of the target gene.}
-  \item{report}{a list of \code{\linkS4class{Report}} objects providing
+  \item{report}{a list of \code{\linkS4class{MTIReport}} objects providing
     the evicence for the interaction.}
 }
 \value{
@@ -30,7 +30,7 @@ MTI( id="", mature_mirna="", species_mirna="", query="", target_gene="", target_
   the \code{pmid} is \code{NA}.
 }
 \seealso{
-  \code{\linkS4class{MTI}}, \code{\linkS4class{Report}}
+  \code{\linkS4class{MTI}}, \code{\linkS4class{MTIReport}}
 }
 \author{
 Johannes Rainer
