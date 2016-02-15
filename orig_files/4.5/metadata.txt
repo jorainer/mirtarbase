@@ -1,0 +1,12 @@
+## Manually generated metadata file.
+name	value
+Db type	MirtarbaseDb
+Type of Gene ID	NCBI Entrezgene ID
+Supporting package	mirtarbase
+Db created by	J Rainer
+Creation date	2016-02-15
+mirbase version	
+version	4.5
+release date	2013-11-01
+source	http://mirtarbase.mbc.nctu.edu.tw
+DBSCHEMAVERSION	1.0

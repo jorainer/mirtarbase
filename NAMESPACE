@@ -20,6 +20,7 @@ importFrom(DBI, dbDriver)
 
 export("MTIReport")
 export("MTI")
+export("listMirtarbaseReleases")
 ## classes:
 exportClasses(MirtarbaseDb, MTIReport, MTI, ExperimentFilter, PublicationFilter,
               SpeciesFilter, SupportTypeFilter, MTIList)

@@ -11,11 +11,12 @@
 ##
 ##*************************************************************************
 ## create a connection to the database and return the MirtarbaseDb object.
-mirtarbaseDb <- function(x){
+MirtarbaseDb <- function(x){
     options(useFancyQuotes=FALSE)
     lite <- dbDriver("SQLite")
     con <- dbConnect(lite, dbname=x, flags=SQLITE_RO)
     tables <- dbListTables(con)
+    tables <- tables[tables != "metadata"]
     ## read the columns for these tables.
     Tables <- vector(length=length(tables), "list")
     for(i in 1:length(Tables)){
@@ -23,9 +24,8 @@ mirtarbaseDb <- function(x){
                                                          tables[ i ], " limit 1")))
     }
     names(Tables) <- tables
-    ## read the info file.
-    info <- read.table(system.file("extdata/txt/INFO", package="mirtarbase"),
-                       header=TRUE, as.is=TRUE, sep="\t")
+    ## Get the metadata
+    info <- dbGetQuery(con, "select * from metadata;")
     ## get also some additional info...
     species_tg <- dbGetQuery(con, "select distinct species_target_gene from mirtarbase;")[ , 1 ]
     species_mirna <- dbGetQuery(con, "select distinct species_mirna from mirtarbase;")[ , 1 ]
@@ -33,8 +33,8 @@ mirtarbaseDb <- function(x){
     MDB <- new("MirtarbaseDb",
                con=con,
                tables=Tables,
-               mirtarbase_version=info[ info$key=="release_version", "value" ],
-               mirtarbase_date=info[ info$key=="release_date", "value" ],
+               mirtarbase_version=info[ info$name=="version", "value" ],
+               mirtarbase_date=info[ info$name=="release date", "value" ],
                species_target_gene=species_tg,
                species_mirna=species_mirna,
                support_type=st

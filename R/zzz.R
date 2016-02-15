@@ -2,9 +2,19 @@
 .onLoad <- function(libname, pkgname){
     ns <- asNamespace(pkgname)
     path <- system.file("extdata", package=pkgname)
+    files <- dir(path, pattern="sqlite")
+    for(i in seq_len(length(files))){
+        db <- MirtarbaseDb(system.file("extdata", files[[i]], package=pkgname,
+                                       lib.loc=libname))
+        objname <- sub(".sqlite$","",files[[i]])
+        assign(objname, db, envir=ns)
+        namespaceExport(ns, objname)
+    }
+    versions <- gsub(files, pattern="MirtarbaseDb.v", replacement="", fixed=TRUE)
+    versions <- gsub(versions, pattern=".sqlite", replacement="", fixed=TRUE)
+    versions <- sort(versions, decreasing=TRUE)
     objname <- "mirtarbase"
-    db <- mirtarbaseDb(paste0(path, "/", objname, ".sqlite"))
-    assign(objname, db, envir=ns)
+    assign(objname, get(paste0("MirtarbaseDb.v", versions[1]), envir=ns), envir=ns)
     tmp <- getSpeciesDF()  ## call this once, so that we read that.
     assign(".mti.species", tmp, envir=ns)
     namespaceExport(ns, objname)
@@ -14,7 +24,15 @@
 }
 
 .onAttach <- function(libname, pkgname){
-    packageStartupMessage(paste("Note: global option \"useFancyQuotes\" was set to FALSE.\n"))
+    ## Loaded xx mirtarbase versions. The shortcut mirtarbase links to the most recent one (6.1).
+    path <- system.file("extdata", package=pkgname)
+    files <- dir(path, pattern="sqlite")
+    versions <- gsub(files, pattern="MirtarbaseDb.v", replacement="")
+    versions <- gsub(versions, pattern=".sqlite", replacement="", fixed=TRUE)
+    versions <- sort(versions, decreasing=TRUE)
+    packageStartupMessage(paste0("mirtarbase:\nLoaded ", length(versions), " miRTarBase release(s).\n",
+                                 "The shortcut 'mirtarbase' links to the most recent one (", versions[1],")\n",
+                                 "Note: global option \"useFancyQuotes\" was set to FALSE.\n"))
 }
 
 .onUnload <- function(libpath){

@@ -40,6 +40,10 @@ setMethod("listColumns", "MirtarbaseDb", function(x, table, skip.keys=TRUE, ...)
     return(columns)
 })
 
+setMethod("metadata", "MirtarbaseDb", function(x, ...){
+    return(dbGetQuery(dbconn(x), "select * from metadata;"))
+})
+
 setMethod("listExperiments", "MirtarbaseDb", function(x, ...){
     Exps <- dbGetQuery(x@con, "select distinct experiments from mirtarbase;")[ , 1 ]
     Exps <- unique(unlist(strsplit(Exps, split="//")))
@@ -80,8 +84,9 @@ setMethod("listSupportTypes", "MirtarbaseDb", function(x, ...){
 
 setMethod("show", "MirtarbaseDb", function(object){
     cat("MirtarbaseDb:\n")
-    cat(paste0("| miRTarbase version: ", object@mirtarbase_version, "\n"))
-    cat(paste0("| miRTarbase date: ", object@mirtarbase_date, "\n"))
+    md <- metadata(object)
+    cat(paste0("| miRTarbase version: ", md[md[, 1] == "version", 2], "\n"))
+    cat(paste0("| miRTarbase date: ", md[md[, 1] == "release date", 2], "\n"))
     con <- object@con
     ## number of MTIs:
     mtis <- dbGetQuery(con, "select count(distinct mirtarbase_id) from mirtarbase;")[1, 1]
@@ -119,6 +124,21 @@ setMethod("listTables", "MirtarbaseDb", function(x, ...){
 setMethod("version", "MirtarbaseDb", function(object, ...){
     return(object@mirtarbase_version)
 })
+
+####============================================================
+##  listMirtarbaseReleases
+##
+##  function to list all releases provided by the mirtarbase package
+####------------------------------------------------------------
+listMirtarbaseReleases <- function(){
+    path <- system.file("extdata", package="mirtarbase")
+    files <- dir(path, pattern="sqlite")
+    files <- gsub(files, pattern=".sqlite", replacement="", fixed=TRUE)
+    versions <- gsub(files, pattern="Mirtarbase.v", replacement="")
+    idx <- order(versions, decreasing=TRUE)
+    Res <- data.frame(variable=files, release=versions, stringsAsFactors=FALSE)
+    return(Res[idx, ])
+}
 
 ##******************************************************
 ##

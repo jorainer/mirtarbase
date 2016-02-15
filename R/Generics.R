@@ -100,7 +100,7 @@ if(!isGeneric("supportedBy"))
 if(!isGeneric("listTables"))
     setGeneric("listTables", function(x, ...)
         standardGeneric("listTables"))
-if(!isGeneric("version"))
+##if(!isGeneric("version"))
     setGeneric("version", function(object, ...)
         standardGeneric("version"))
 

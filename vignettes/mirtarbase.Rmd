@@ -30,7 +30,7 @@ vignette: >
   %\VignetteIndexEntry{mirtarbase: a database of validated miRNA target gene interactions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{BiocStyle,mirtarbase}
+  %\VignetteDepends{mirtarbase}
   %\VignettePackage{mirtarbase}
   %\VignetteKeywords{annotation,database,miRNA}
 bibliography: references.bib
@@ -43,9 +43,8 @@ references:
     given: noname
 ---
 
-**Package**: `r BiocStyle::Biocpkg("mirtarbase")`<br />
 **Authors**: `r packageDescription("mirtarbase")$Author`<br />
-**Modified**: 12 February, 2016<br />
+**Modified**: 15 February, 2016<br />
 **Compiled**: `r date()`
 
 # Introduction<a id="orgheadline1"></a>
@@ -53,12 +52,16 @@ references:
 The `mirtarbase` package provides the experimentally validated miRNA-target gene
 interactions (MTIs) defined in the miRTarbase database [@Hsu:2014co].
 
-```{r warning=FALSE, message=FALSE}
+The database, which was build based on the Excel spread sheet that can be
+downloaded from the miRTarbase main site <http://mirtarbase.mbc.nctu.edu.tw/>, is
+automatically loaded upon library startup and bound to the environment variable
+`MirtarbaseDb.v<release>`, where `<release>` stands for the release of the
+miRTarBase. In addition, a shortcut `mirtarbase` is automatically generated and
+linked to the (most recent) release available in the package.
+
+```{r warning=FALSE}
 library(mirtarbase)
 ```
-
-This package was build based on the Excel spread sheet that can be downloaded
-from the miRTarbase main site <http://mirtarbase.mbc.nctu.edu.tw/>.
 
 # Usage<a id="orgheadline7"></a>
 

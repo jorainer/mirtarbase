@@ -1,3 +1,13 @@
+VERSION 0.99.2
+--------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+    o New database layout.
+    o Database file is now saved in the format "MirtarbaseDb.v<version>".
+    o The package suports loading of multiple different MirtarbaseDb versions,
+      with the most recent release being linked to 'mirtarbase'.
+
+
 VERSION 0.99.1
 --------------
 
