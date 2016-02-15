@@ -46,6 +46,11 @@ references:
 **Compiled**: `r date()`
 #+END_EXPORT
 
+#+BEGIN_SRC R :ravel echo=FALSE, results='asis'
+  BiocStyle::markdown()
+#+END_SRC
+
+
 * How to export this to a =Rmd= vignette			   :noexport:
 
 Use =ox-ravel= to export this file as an R markdown file (=C-c C-e m r=). That
@@ -420,35 +425,49 @@ function refer to the help page of the e.g. =premirna2matmirna= function.
 
 * Database layout<<section.database.layout>>
 
-The database consists of a single table, =mirtarbase= which contains all
-information stored in the xls file from the miRTarbase web site. The column
-names and their properties are listed below. Each line in the table represents
-the MTI for a miRNA and one of its target genes as reported in a
-publication. Thus, an interaction between a miRNA and its target gene can be
-listed in more than one row, depending on the number of publications it was
-validated.
+The database consists of 3 tables, =mirtarbase= which contains all information
+stored in the xls file from the miRTarBase web site, =pubmed_corpus=, that
+contains the content of the /MTI-PubMed_corpus.txt/ file from the miRTarBase web
+site and =metadata= with some internal informations. The column names and their
+properties are listed below. Each line in the table represents the MTI for a
+miRNA and one of its target genes as reported in a publication. Thus, an
+interaction between a miRNA and its target gene can be listed in more than one
+row, depending on the number of publications it was validated.
 
-+ =mirtarbase_id=: identifier for the miRNA target gene interaction (MTI). Note
-  that this ID is not unique, i.e. MTIs reported in several publications have
-  the same ID but are listed in several rows of the table.
-+ =mirna=: mature miRNA name (a.k.a miRNA ID, e.g. /hsa-miR-20a-5p/).
-+ =species_mirna=: the species of the miRNA (e.g. /Homo sapiens/).
-+ =target_gene=: the official gene name (symbol) for the gene (e.g. /DUSP6/, or
-  /ush/).
-+ =target_gene_entrez_gene_id=: the NCBI Entrezgene ID for the target gene;
-  either =NA= or the (numerical) Entrezgene ID. Contains only unique values, no
-  multiple IDs collapsed by any separator.
-+ =species_target_gene=: the species of the target gene.
-+ =experiments=: the experiments providing the evidence for the interaction as
-  reported in one publication.
-+ =support_type=: the different types of support (from weak to strong).
-+ =references_pmid=: the Pubmed ID of the publication reporting the MTI. Each
-  line with a single Pubmed ID, no empty (=NA=) values.
++ *mirtarbase*:
 
+  + =mirtarbase_id=: identifier for the miRNA target gene interaction (MTI). Note
+    that this ID is not unique, i.e. MTIs reported in several publications have
+    the same ID but are listed in several rows of the table.
+  + =mirna=: mature miRNA name (a.k.a miRNA ID, e.g. /hsa-miR-20a-5p/).
+  + =species_mirna=: the species of the miRNA (e.g. /Homo sapiens/).
+  + =target_gene=: the official gene name (symbol) for the gene (e.g. /DUSP6/, or
+    /ush/).
+  + =target_gene_entrez_gene_id=: the NCBI Entrezgene ID for the target gene;
+    either =NA= or the (numerical) Entrezgene ID. Contains only unique values, no
+    multiple IDs collapsed by any separator.
+  + =species_target_gene=: the species of the target gene.
+  + =experiments=: the experiments providing the evidence for the interaction as
+    reported in one publication.
+  + =support_type=: the different types of support (from weak to strong).
+  + =references_pmid=: the Pubmed ID of the publication reporting the MTI. Each
+    line with a single Pubmed ID, no empty (=NA=) values.
+
++ *pubmed_corpus*
+  + =pmid=: the PubMed ID of the paper describing the MTI.
+  + =key=: the key of the entry (can be /Abstract/, /Title/,
+    /Experiment_method/, /miRNA/ or /Target_gene/).
+  + =value=: the value for the key.
+
++ *metadata*
+  + =name=: the names of the keys.
+  + =value=: the value for the key.
 
 * TODOs								   :noexport:
 
-** TODO Fix all documentation discrepancies.
+** DONE Fix all documentation discrepancies.
+   CLOSED: [2016-02-15 Mon 15:36]
+   - State "DONE"       from "TODO"       [2016-02-15 Mon 15:36]
 ** DONE Why the heck don't I get /distinct/ results?
    CLOSED: [2016-02-12 Fri 21:46]
 
@@ -463,8 +482,12 @@ A =mtis= with columns =mirna= and =target_gene= returns non-unique results... wh
    - State "DONE"       from "TODO"       [2016-02-15 Mon 09:06]
 In that case =columns= is ignored.
 
-** TODO Update and fix help pages.
-** TODO Update and fix the vignette.
+** DONE Update and fix help pages.
+   CLOSED: [2016-02-15 Mon 15:36]
+   - State "DONE"       from "TODO"       [2016-02-15 Mon 15:36]
+** DONE Update and fix the vignette.
+   CLOSED: [2016-02-15 Mon 15:36]
+   - State "DONE"       from "TODO"       [2016-02-15 Mon 15:36]
 ** DONE Add/fix the copyright and license.
    CLOSED: [2016-02-15 Mon 09:06]
    - State "DONE"       from "TODO"       [2016-02-15 Mon 09:06]

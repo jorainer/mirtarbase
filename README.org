@@ -2,6 +2,10 @@
 #+AUTHOR: Johannes Rainer
 #+email: johannes.rainer@eurac.edu
 
+[[https://travis-ci.org/jotsetung/mirtarbase][https://travis-ci.org/jotsetung/mirtarbase.svg?branch=master]]
+[[https://codecov.io/github/jotsetung/mirtarbase?branch=master][https://codecov.io/github/jotsetung/mirtarbase/coverage.svg?branch=master]]
+
+
 
 * miRTarBase R package
 
@@ -42,7 +46,7 @@ encoding of the file (i.e. /UTF-8/) and thus avoid invalid character encodings!
 #+BEGIN_SRC R :results silent :exports results :eval never
   library(RSQLite)
 
-  mtbVersion <- "4.5"
+  mtbVersion <- "6.1"
   ## the XLS file contains ' and " inside cells, thus have to set qupte=""
   ## MTI <- read.table("orig_files/6.0/miRTarBase_MTI.txt", sep="\t", as.is=TRUE,
   ##                   header=TRUE, check.names=FALSE, quote="", encoding="us-ascii")
@@ -196,6 +200,7 @@ installation of =SQLite=.
   con <- dbConnect(dbDriver("SQLite"), dbname=paste0("inst/extdata/", DBN))
   dbWriteTable(con, name="mirtarbase", MTI, row.names=FALSE)
   dbWriteTable(con, name="metadata", metadata, row.names=FALSE)
+  pmCorpus <- as.data.frame(pmCorpus)
   dbWriteTable(con, name="pubmed_corpus", pmCorpus, row.names=FALSE)
   dbGetQuery(con, "create index mirna_idx on mirtarbase (mirna);")
   dbGetQuery(con, "create index target_gene_idx on mirtarbase (target_gene);")

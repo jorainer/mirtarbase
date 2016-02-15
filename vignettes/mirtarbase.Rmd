@@ -47,6 +47,10 @@ references:
 **Modified**: 15 February, 2016<br />
 **Compiled**: `r date()`
 
+```{r echo=FALSE, results='asis'}
+BiocStyle::markdown()
+```
+
 # Introduction<a id="orgheadline1"></a>
 
 The `mirtarbase` package provides the experimentally validated miRNA-target gene
@@ -391,29 +395,41 @@ premirna2matmirna(c("hsa-mir-16-1", "hsa-mir-16-2"), return.type="list")
 
 # Database layout<a id="orgtarget1"></a><a id="orgheadline8"></a>
 
-The database consists of a single table, `mirtarbase` which contains all
-information stored in the xls file from the miRTarbase web site. The column
-names and their properties are listed below. Each line in the table represents
-the MTI for a miRNA and one of its target genes as reported in a
-publication. Thus, an interaction between a miRNA and its target gene can be
-listed in more than one row, depending on the number of publications it was
-validated.
+The database consists of 3 tables, `mirtarbase` which contains all information
+stored in the xls file from the miRTarBase web site, `pubmed_corpus`, that
+contains the content of the *MTI-PubMed\_corpus.txt* file from the miRTarBase web
+site and `metadata` with some internal informations. The column names and their
+properties are listed below. Each line in the table represents the MTI for a
+miRNA and one of its target genes as reported in a publication. Thus, an
+interaction between a miRNA and its target gene can be listed in more than one
+row, depending on the number of publications it was validated.
 
--   `mirtarbase_id`: identifier for the miRNA target gene interaction (MTI). Note
-    that this ID is not unique, i.e. MTIs reported in several publications have
-    the same ID but are listed in several rows of the table.
--   `mirna`: mature miRNA name (a.k.a miRNA ID, e.g. *hsa-miR-20a-5p*).
--   `species_mirna`: the species of the miRNA (e.g. *Homo sapiens*).
--   `target_gene`: the official gene name (symbol) for the gene (e.g. *DUSP6*, or
-    *ush*).
--   `target_gene_entrez_gene_id`: the NCBI Entrezgene ID for the target gene;
-    either `NA` or the (numerical) Entrezgene ID. Contains only unique values, no
-    multiple IDs collapsed by any separator.
--   `species_target_gene`: the species of the target gene.
--   `experiments`: the experiments providing the evidence for the interaction as
-    reported in one publication.
--   `support_type`: the different types of support (from weak to strong).
--   `references_pmid`: the Pubmed ID of the publication reporting the MTI. Each
-    line with a single Pubmed ID, no empty (`NA`) values.
+-   **mirtarbase**:
+    -   `mirtarbase_id`: identifier for the miRNA target gene interaction (MTI). Note
+        that this ID is not unique, i.e. MTIs reported in several publications have
+        the same ID but are listed in several rows of the table.
+    -   `mirna`: mature miRNA name (a.k.a miRNA ID, e.g. *hsa-miR-20a-5p*).
+    -   `species_mirna`: the species of the miRNA (e.g. *Homo sapiens*).
+    -   `target_gene`: the official gene name (symbol) for the gene (e.g. *DUSP6*, or
+        *ush*).
+    -   `target_gene_entrez_gene_id`: the NCBI Entrezgene ID for the target gene;
+        either `NA` or the (numerical) Entrezgene ID. Contains only unique values, no
+        multiple IDs collapsed by any separator.
+    -   `species_target_gene`: the species of the target gene.
+    -   `experiments`: the experiments providing the evidence for the interaction as
+        reported in one publication.
+    -   `support_type`: the different types of support (from weak to strong).
+    -   `references_pmid`: the Pubmed ID of the publication reporting the MTI. Each
+        line with a single Pubmed ID, no empty (`NA`) values.
+
+-   **pubmed\_corpus**
+    -   `pmid`: the PubMed ID of the paper describing the MTI.
+    -   `key`: the key of the entry (can be *Abstract*, *Title*,
+        *Experiment\_method*, *miRNA* or *Target\_gene*).
+    -   `value`: the value for the key.
+
+-   **metadata**
+    -   `name`: the names of the keys.
+    -   `value`: the value for the key.
 
 # References<a id="orgheadline9"></a>

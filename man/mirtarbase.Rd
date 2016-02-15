@@ -1,6 +1,7 @@
 \name{mirtarbase}
 \alias{mirtarbase}
 \alias{MirtarbaseDb.v4.5}
+\alias{MirtarbaseDb.v6.1}
 \alias{listMirtarbaseReleases}
 \title{
   miRTarBase (MTI) database package.

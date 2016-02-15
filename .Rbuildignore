@@ -1,2 +1,5 @@
+.git
 vignettes/mirtarbase.org
 orig_files/*
+README.org
+^\.travis\.yml$
