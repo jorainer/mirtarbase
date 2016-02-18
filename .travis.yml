@@ -39,7 +39,7 @@ notifications:
 
 env:
     global:
-      - RVERSION=release BIOC_USE_DEVEL=FALSE _R_CHECK_FORCE_SUGGEST_=FALSE
+      - RVERSION=devel BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGEST_=FALSE
 
 ## env:
 ##   matrix:
