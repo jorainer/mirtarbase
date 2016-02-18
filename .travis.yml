@@ -38,11 +38,14 @@ notifications:
 ##     - RVERSION=devel
 
 env:
-  matrix:
-      - RVERSION=release
-      - _R_CHECK_FORCE_SUGGESTS_=FALSE
-      - BIOC_USE_DEVEL=FALSE
-      - RVERSION=release
+    global:
+      - RVERSION=release BIOC_USE_DEVEL=FALSE _R_CHECK_FORCE_SUGGEST_=FALSE
+
+## env:
+##   matrix:
+##       - RVERSION=release
+##       - _R_CHECK_FORCE_SUGGESTS_=FALSE
+##       - BIOC_USE_DEVEL=FALSE
 
 ## Alternatively, set R_BUILD_ARGS and R_CHECK_ARGS?
 
