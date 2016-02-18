@@ -11,7 +11,7 @@ before_install:
 
 install:
   - ./pkg-build.sh install_github jimhester/covr
-  - ./pkg-build.sh install_bioc BiocGenerics S4Vectors ensembldb RSQLite DBI AnnotationDbi mirbase.db parallel BiocStyle knitr RUnit rmarkdown
+  - ./pkg-build.sh install_bioc_deps
   - ./pkg-build.sh install_github jotsetung/mirhostgenes jotsetung/MirhostDb.Hsapiens.v75.v20
 
 ##  - ./pkg-build.sh install_bioc_deps
@@ -38,9 +38,11 @@ notifications:
 ##     - RVERSION=devel
 
 env:
-  global:
+  matrix:
       - RVERSION=release
       - _R_CHECK_FORCE_SUGGESTS_=FALSE
+      - BIOC_USE_DEVEL=FALSE
+      - RVERSION=release
 
 ## Alternatively, set R_BUILD_ARGS and R_CHECK_ARGS?
 

@@ -42,7 +42,6 @@ All in all, we hope that we don't encounter some more issues in the next release
 file as a tabulator delimited text file. That way we can specify the /correct/
 encoding of the file (i.e. /UTF-8/) and thus avoid invalid character encodings!
 
-#+NAME: src.read.tables
 #+BEGIN_SRC R :results silent :exports results :eval never
   library(RSQLite)
 
@@ -85,6 +84,65 @@ encoding of the file (i.e. /UTF-8/) and thus avoid invalid character encodings!
   }
   ## exporting the file again.
   ## write.table(MTI, file="orig_files/txt/miRTarBase_MTI.txt", sep="\t", row.names=FALSE)
+
+#+END_SRC
+
+
+#+BEGIN_SRC R
+  metadata <- read.table(paste0("orig_files/", mtbVersion, "/metadata.txt"), sep="\t", header=TRUE, as.is=TRUE)
+  ## Replace the version etc.
+  metadata[metadata[, 1] == "version", 2] <- mtbVersion
+  metadata[metadata[, 1] == "Creation date", 2] <- as.character(Sys.Date())
+#+END_SRC
+
+And at last the /pubmed_corpus/ table based on the corresponding data downloaded
+from the mirTarBase database.
+
+#+BEGIN_SRC R
+
+  ## NOTE: this file does only exist for miRTarBase >= 6.1!
+  pmc <- paste0("orig_files/",mtbVersion ,"/MTI-PubMed_corpus.txt")
+  if(file.exists(pmc)){
+      pmCorpus <- readLines(pmc)
+      ## Remove the empty lines.
+      pmCorpus <- pmCorpus[pmCorpus != ""]
+      pmCorpus <- strsplit(pmCorpus, split="\t")
+
+      ## Not unexpectedly, the format is not that straight forward. Also, some stuff
+      ## seems to be missing, considering the README online...
+      ## For all those entries that have 4 elements, delete the 2nd.
+      pmCorpus <- lapply(pmCorpus, function(z){
+          if(length(z) == 4){
+              return(z[c(1, 3, 4)])
+          }else{
+              return(z)
+          }
+      })
+      pmCorpus <- do.call(rbind, pmCorpus)
+      colnames(pmCorpus) <- c("pmid", "key", "value")
+  }else{
+      pmCorpus <- data.frame(matrix(ncol=3, nrow=0))
+      colnames(pmCorpus) <- c("pmid", "key", "value")
+  }
+
+
+#+END_SRC
+
+Next we create the database for the package. This requires a working
+installation of =SQLite=.
+
+#+NAME: src.create.tables
+#+BEGIN_SRC R :results silent :exports code :eval never
+  DBN <- paste0("MirtarbaseDb.v", mtbVersion, ".sqlite")
+  con <- dbConnect(dbDriver("SQLite"), dbname=paste0("inst/extdata/", DBN))
+  dbWriteTable(con, name="mirtarbase", MTI, row.names=FALSE)
+  dbWriteTable(con, name="metadata", metadata, row.names=FALSE)
+  pmCorpus <- as.data.frame(pmCorpus)
+  dbWriteTable(con, name="pubmed_corpus", pmCorpus, row.names=FALSE)
+  dbGetQuery(con, "create index mirna_idx on mirtarbase (mirna);")
+  dbGetQuery(con, "create index target_gene_idx on mirtarbase (target_gene);")
+  dbGetQuery(con, "create index target_gene_entrez_idx on mirtarbase (target_gene_entrez_gene_id);")
+  dbDisconnect(con)
 
 #+END_SRC
 
@@ -150,64 +208,6 @@ one report.
 #+END_SRC
 
 Next we create the metadata database table.
-
-#+BEGIN_SRC R
-  metadata <- read.table(paste0("orig_files/", mtbVersion, "/metadata.txt"), sep="\t", header=TRUE, as.is=TRUE)
-  ## Replace the version etc.
-  metadata[metadata[, 1] == "version", 2] <- mtbVersion
-  metadata[metadata[, 1] == "Creation date", 2] <- as.character(Sys.Date())
-#+END_SRC
-
-And at last the /pubmed_corpus/ table based on the corresponding data downloaded
-from the mirTarBase database.
-
-#+BEGIN_SRC R
-
-  ## NOTE: this file does only exist for miRTarBase >= 6.1!
-  pmc <- paste0("orig_files/",mtbVersion ,"/MTI-PubMed_corpus.txt")
-  if(file.exists(pmc)){
-      pmCorpus <- readLines(pmc)
-      ## Remove the empty lines.
-      pmCorpus <- pmCorpus[pmCorpus != ""]
-      pmCorpus <- strsplit(pmCorpus, split="\t")
-
-      ## Not unexpectedly, the format is not that straight forward. Also, some stuff
-      ## seems to be missing, considering the README online...
-      ## For all those entries that have 4 elements, delete the 2nd.
-      pmCorpus <- lapply(pmCorpus, function(z){
-          if(length(z) == 4){
-              return(z[c(1, 3, 4)])
-          }else{
-              return(z)
-          }
-      })
-      pmCorpus <- do.call(rbind, pmCorpus)
-      colnames(pmCorpus) <- c("pmid", "key", "value")
-  }else{
-      pmCorpus <- data.frame(matrix(ncol=3, nrow=0))
-      colnames(pmCorpus) <- c("pmid", "key", "value")
-  }
-
-
-#+END_SRC
-
-Next we create the database for the package. This requires a working
-installation of =SQLite=.
-
-#+NAME: src.create.tables
-#+BEGIN_SRC R :results silent :exports code :eval never
-  DBN <- paste0("MirtarbaseDb.v", mtbVersion, ".sqlite")
-  con <- dbConnect(dbDriver("SQLite"), dbname=paste0("inst/extdata/", DBN))
-  dbWriteTable(con, name="mirtarbase", MTI, row.names=FALSE)
-  dbWriteTable(con, name="metadata", metadata, row.names=FALSE)
-  pmCorpus <- as.data.frame(pmCorpus)
-  dbWriteTable(con, name="pubmed_corpus", pmCorpus, row.names=FALSE)
-  dbGetQuery(con, "create index mirna_idx on mirtarbase (mirna);")
-  dbGetQuery(con, "create index target_gene_idx on mirtarbase (target_gene);")
-  dbGetQuery(con, "create index target_gene_entrez_idx on mirtarbase (target_gene_entrez_gene_id);")
-  dbDisconnect(con)
-
-#+END_SRC
 
 
 * Database layout						   :noexport:
