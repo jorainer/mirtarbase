@@ -24,7 +24,9 @@ after_failure:
   - ./pkg-build.sh dump_logs
 
 after_success:
-  - Rscript -e 'library(covr);codecov()'
+  - ./pkg-build.sh r_script -e 'covr::codecov()'
+
+## - Rscript -e 'library(covr);codecov()'
 
 notifications:
   email:
