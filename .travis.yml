@@ -1,91 +1,45 @@
-## .travis.yml for R projects.
+## Sample .travis.yml file for use with metacran/r-builder
+## See https://github.com/metacran/r-builder for details.
 
-language: r
+language: c
 sudo: required
 
-warnings_are_errors: false
-bioc_required: true
+before_install:
+  - curl -OL https://raw.githubusercontent.com/metacran/r-builder/master/pkg-build.sh
+  - chmod 755 pkg-build.sh
+  - ./pkg-build.sh bootstrap
 
-r_binary_packages:
-  - RUnit
-  - knitr
-  - rmarkdown
+install:
+  - ./pkg-build.sh install_github jimhester/covr
+  - ./pkg-build.sh install_bioc_deps
+  - ./pkg-build.sh install_github jotsetung/mirhostgenes jotsetung/MirhostDb.Hsapiens.v75.v20
 
-bioc_packages:
-  - BiocGenerics
-  - S4Vectors
-  - ensembldb
-  - AnnotationDbi
-  - DBI
-  - RSQLite
-  - parallel
+##  - ./pkg-build.sh install_bioc_deps
+##  - ./pkg-build.sh install_deps
 
-r_github_packages:
-  - jimhester/covr
-  - jotsetung/mirhostgenes
-  - jotsetung/MirhostDb.Hsapiens.v75.v20
+script:
+  - ./pkg-build.sh run_tests
+
+after_failure:
+  - ./pkg-build.sh dump_logs
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+  - Rscript -e 'library(covr);codecov()'
 
 notifications:
   email:
     on_success: change
     on_failure: change
 
-env:
-  global:
-    - BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGESTS_=FALSE RVERSION=devel
-
-## ## Sample .travis.yml file for use with metacran/r-builder
-## ## See https://github.com/metacran/r-builder for details.
-
-## language: c
-## sudo: required
-
-## before_install:
-##   - curl -OL https://raw.githubusercontent.com/metacran/r-builder/master/pkg-build.sh
-##   - chmod 755 pkg-build.sh
-##   - ./pkg-build.sh bootstrap
-
-## install:
-##   - ./pkg-build.sh install_github jimhester/covr
-##   - ./pkg-build.sh install_bioc_deps
-##   - ./pkg-build.sh install_github jotsetung/mirhostgenes jotsetung/MirhostDb.Hsapiens.v75.v20
-
-## ##  - ./pkg-build.sh install_bioc_deps
-## ##  - ./pkg-build.sh install_deps
-
-## script:
-##   - ./pkg-build.sh run_tests
-
-## after_failure:
-##   - ./pkg-build.sh dump_logs
-
-## after_success:
-##   - Rscript -e 'covr::codecov()'
-
-## notifications:
-##   email:
-##     on_success: change
-##     on_failure: change
-
-## ## env:
-## ##   matrix:
-## ##     - RVERSION=oldrel
-## ##     - RVERSION=release
-## ##     - RVERSION=devel
-
 ## env:
-##     global:
-##       - RVERSION=devel BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGESTS_=FALSE
+##   matrix:
+##     - RVERSION=oldrel
+##     - RVERSION=release
+##     - RVERSION=devel
 
-## ## env:
-## ##   matrix:
-## ##       - RVERSION=release
-## ##       - _R_CHECK_FORCE_SUGGESTS_=FALSE
-## ##       - BIOC_USE_DEVEL=FALSE
+env:
+    global:
+      - RVERSION=devel BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGESTS_=FALSE
 
-## ## Alternatively, set R_BUILD_ARGS and R_CHECK_ARGS?
 
 
