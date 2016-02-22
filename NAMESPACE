@@ -23,7 +23,7 @@ export("MTI")
 export("listMirtarbaseReleases")
 ## classes:
 exportClasses(MirtarbaseDb, MTIReport, MTI, ExperimentFilter, PublicationFilter,
-              SpeciesFilter, SupportTypeFilter, MTIList)
+              SpeciesFilter, SupportTypeFilter, MTIList, MirtarbaseidFilter)
 ## methods for MirtarbaseDb:
 exportMethods(dbconn, show, listColumns, column, listExperiments, listPmids,
               listSpecies, listSupportTypes, mtis, mtisBy, listTables, version)
@@ -33,7 +33,8 @@ exportMethods(as.data.frame, entrezid, experiments, gene, geneSpecies,
               reportCount, reports, "reports<-", supportedBy)
 ## methods for Filters
 exportMethods(where, column, condition, value, "value<-", "condition<-")
-export(ExperimentFilter, PublicationFilter, SpeciesFilter, SupportTypeFilter, MTIList)
+export(ExperimentFilter, PublicationFilter, SpeciesFilter, SupportTypeFilter, MTIList,
+       MirtarbaseidFilter)
 ## export mirbase conversion functions from pre-miRNA to mature miRNAs
 export(premirna2matmirna, premirna2matmirnaAcc, premirnaAcc2matmirnaAcc,
        premirnaAcc2matmirna, premirnaAcc2premirna, premirna2premirnaAcc)
@@ -48,5 +49,7 @@ export(premirna2mirfam, premirnaAcc2mirfam, premirnaAcc2mirfamAcc,
 export(matmirna2mirfam, matmirna2mirfamAcc, matmirnaAcc2mirfam, matmirnaAcc2mirfamAcc,
        mirfam2matmirna, mirfam2matmirnaAcc, mirfamAcc2matmirna, mirfamAcc2matmirnaAcc)
 
+## Methods for/from AnnotationDbi
+exportMethods(columns, keytypes, keys, select)
 ##exportMethods(show, experiments, supportedBy, pmid, id, reports, experiments, matureMirna, mirnaSpecies, targetGene, targetGeneSpecies, targetGeneEntrezid, reportCount, mirna, mirnaAccession, mirnaFamily, matureAccession, matureSequence)
 

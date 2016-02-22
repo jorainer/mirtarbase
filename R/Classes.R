@@ -233,3 +233,24 @@ SupportTypeFilter <- function(value, condition="="){
     return(new("SupportTypeFilter", condition=condition, value=as.character(value)))
 }
 
+## filter for species
+setClass("MirtarbaseidFilter", contains="BasicFilter",
+         prototype=list(
+             condition="=",
+             value="",
+             valueIsCharacter=TRUE
+         )
+         )
+MirtarbaseidFilter <- function(value, condition="="){
+    if(missing(value)){
+        stop("A filter without a value makes no sense!")
+    }
+    if(length(value) > 1){
+        if(condition=="=")
+            condition="in"
+        if(condition=="!=")
+            condition="not in"
+    }
+    return(new("MirtarbaseidFilter", condition=condition, value=as.character(value)))
+}
+

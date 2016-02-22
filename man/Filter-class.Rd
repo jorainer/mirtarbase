@@ -5,6 +5,7 @@
 \alias{PublicationFilter-class}
 \alias{SpeciesFilter-class}
 \alias{SupportTypeFilter-class}
+\alias{MirtarbaseidFilter-class}
 % defined in ensembldb
 \alias{column,EntrezidFilter,MirtarbaseDb-method}
 \alias{column,EntrezidFilter,MirtarbaseDb,ANY-method}
@@ -48,10 +49,12 @@
 \alias{column,PublicationFilter,MirtarbaseDb,ANY-method}
 \alias{column,SpeciesFilter,MirtarbaseDb,ANY-method}
 \alias{column,SupportTypeFilter,MirtarbaseDb,ANY-method}
+\alias{column,MirtarbaseidFilter,MirtarbaseDb,ANY-method}
 \alias{where,ExperimentFilter,MirtarbaseDb-method}
 \alias{where,PublicationFilter,MirtarbaseDb-method}
 \alias{where,ExperimentFilter,MirtarbaseDb,ANY-method}
 \alias{where,PublicationFilter,MirtarbaseDb,ANY-method}
+\alias{where,MirtarbaseidFilter,MirtarbaseDb,ANY-method}
 \alias{show,SpeciesFilter,MirtarbaseDb-method}
 \alias{show,SpeciesFilter-method}
 \alias{where,SpeciesFilter,MirtarbaseDb-method}
@@ -72,8 +75,8 @@
   While objects can be created by calls e.g. of the form
   \code{new("ExperimentFilter", ...)} users are strongly encouraged to use
   the specific functions: \code{\link{ExperimentFilter}},
-  \code{\link{PublicationFilter}}, \code{\link{SpeciesFilter}} and
-  \code{\link{SupportTypeFilter}}.
+  \code{\link{PublicationFilter}}, \code{\link{SpeciesFilter}},
+  \code{\link{SupportTypeFilter}} and \code{\link{MirtarbaseidFilter}}.
   See examples below for usage.
 }
 \section{Slots}{
@@ -215,6 +218,10 @@
       Restrict the results to MTIs with specified support type/evidence
       level. Use the method \code{\link{listSupportTypes}} to get a list
       of available support types.
+    }
+
+    \item{MirtarbaseidFilter}{
+      Restrict the results to MTIs based on certain Mirtarbase IDs.
     }
 
   }

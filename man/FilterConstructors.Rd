@@ -3,6 +3,7 @@
 \alias{PublicationFilter}
 \alias{SpeciesFilter}
 \alias{SupportTypeFilter}
+\alias{MirtarbaseidFilter}
 \title{
   Constructor functions for filter objects
 }
@@ -15,6 +16,7 @@ ExperimentFilter(value, condition = "=" )
 PublicationFilter(value, condition = "=" )
 SpeciesFilter(value, condition = "=", feature="gene" )
 SupportTypeFilter(value, condition = "=" )
+MirtarbaseidFilter(value, condition="=")
 }
 \arguments{
   \item{condition}{
@@ -44,7 +46,8 @@ SupportTypeFilter(value, condition = "=" )
   \code{\linkS4class{ExperimentFilter}},
   \code{\linkS4class{PublicationFilter}},
   \code{\linkS4class{SpeciesFilter}},
-  \code{\linkS4class{SupportTypeFilter}}
+  \code{\linkS4class{SupportTypeFilter}},
+  \code{\linkS4class{MirtarbaseidFilter}}
 }
 \author{
   Johannes Rainer

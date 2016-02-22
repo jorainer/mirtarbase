@@ -3,17 +3,18 @@
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#orgheadline1">1. Introduction</a></li>
-<li><a href="#orgheadline7">2. Usage</a>
+<li><a href="#orgheadline8">2. Usage</a>
 <ul>
 <li><a href="#orgheadline2">2.1. Get miRNA-target gene interactions for a specific gene</a></li>
 <li><a href="#orgheadline3">2.2. Get miRNA-target gene interactions for a miRNA</a></li>
 <li><a href="#orgheadline4">2.3. Get grouped miRNA-target gene interactions</a></li>
 <li><a href="#orgheadline5">2.4. Alternative way to fetch data from the database</a></li>
 <li><a href="#orgheadline6">2.5. Conversions between miRNA identifiers</a></li>
+<li><a href="#orgheadline7">2.6. Using <code>mirtarbase</code> in the <code>AnnotationDbi</code> framework</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline8">3. Database layout</a></li>
-<li><a href="#orgheadline9">4. References</a></li>
+<li><a href="#orgheadline9">3. Database layout</a></li>
+<li><a href="#orgheadline10">4. References</a></li>
 </ul>
 </div>
 </div>
@@ -44,7 +45,7 @@ references:
 ---
 
 **Authors**: `r packageDescription("mirtarbase")$Author`<br />
-**Modified**: 15 February, 2016<br />
+**Modified**: 22 February, 2016<br />
 **Compiled**: `r date()`
 
 ```{r echo=FALSE, results='asis'}
@@ -67,7 +68,7 @@ linked to the (most recent) release available in the package.
 library(mirtarbase)
 ```
 
-# Usage<a id="orgheadline7"></a>
+# Usage<a id="orgheadline8"></a>
 
 After the package is loaded the database can be accessed through the
 `MirtarbaseDb` object bound to the `mirtarbase` variable.
@@ -104,6 +105,8 @@ The following filter classes are used by the package (in alphabetical order):
 -   `MirfamFilter`: filter the results based on miRNAs of specific miRNA families.
 -   `MirfamidFilter`: filter the results based on miRNAs of specific miRNA
     families identified by their mirbase accession number.
+-   `MirtarbaseidFilter`; filter the results based on the ID of the miRTarBase
+    database.
 -   `PremirnaFilter`: filter the results for MTIs of mature miRNAs derived from
     the specified pre-miRNA(s).
 -   `PremirnaidFilter`: filter the results for MTIs of mature miRNAs derived from
@@ -393,7 +396,51 @@ premirna2matmirna(c("hsa-mir-16-1", "hsa-mir-16-2"))
 premirna2matmirna(c("hsa-mir-16-1", "hsa-mir-16-2"), return.type="list")
 ```
 
-# Database layout<a id="orgtarget1"></a><a id="orgheadline8"></a>
+## Using `mirtarbase` in the `AnnotationDbi` framework<a id="orgheadline7"></a>
+
+The `mirtarbase` package implements also methods `keys`, `keytypes`, `columns`
+and `select` from the `AnnotationDbi` package that allow to query data from a
+`MirtarbaseDb` analogously to other `AnnotationDbi` objects. The supported
+columns by these methods are:
+
+```{r }
+## List all supported columns that can be queried.
+columns(mirtarbase)
+
+## Note that these column names are different to those supported
+## by the mtis method:
+listColumns(mirtarbase)
+```
+
+We can use the `keys` and `keytypes` methods to retrieve the supported keytypes
+for the `select` method.
+
+```{r }
+## List all supported keytypes
+keytypes(mirtarbase)
+
+## List all keys for "Support Type"
+keys(mirtarbase, keytype="SUPPORTTYPE")
+
+## Use select to retrieve all MTIs for support type "Functional MTI"
+mtis <- select(mirtarbase, keys="Functional MTI", keytype="SUPPORTTYPE")
+head(mtis)
+nrow(mtis)
+```
+
+The `select` method for `MirtarbaseDb` allows in addition also to submit one or
+more filter objects with argument `keys`. This enables more flexible queries
+than possible with the *standard* usage. Below we retrieve all MTIs of support
+type *Functional MTI* for genes *BCL2* and *BCL2L11*.
+
+```{r }
+mtis <- select(mirtarbase, keys=list(SupportTypeFilter("Functional MTI"),
+				     GenenameFilter(c("BCL2", "BCL2L11"))))
+head(mtis)
+nrow(mtis)
+```
+
+# Database layout<a id="orgtarget1"></a><a id="orgheadline9"></a>
 
 The database consists of 3 tables, `mirtarbase` which contains all information
 stored in the xls file from the miRTarBase web site, `pubmed_corpus`, that
@@ -432,4 +479,4 @@ row, depending on the number of publications it was validated.
     -   `name`: the names of the keys.
     -   `value`: the value for the key.
 
-# References<a id="orgheadline9"></a>
+# References<a id="orgheadline10"></a>

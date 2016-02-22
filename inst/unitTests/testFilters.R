@@ -141,6 +141,15 @@ test_SupportTypeFilter <- function(){
     listSupportTypes(mirtarbase)
 }
 
+test_MirtarbaseidFilter <- function(){
+
+    mtf <- MirtarbaseidFilter("unknown")
+    ## the attribute that will be queried
+    checkEquals(column(mtf, mirtarbase), "mirtarbase_id")
+    where(mtf, mirtarbase)
+
+}
+
 
 test_PremirnaFilter <- function(){
     ##***********************

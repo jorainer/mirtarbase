@@ -752,6 +752,28 @@ setMethod("where", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
 
 ##***********************************************************************
 ##
+##     Implementations for MirtarbaseidFilter.
+##
+##     overwriting/implementation of methods for BasicFilter defined
+##     in ensembldb
+##
+##***********************************************************************
+setMethod("requireTable", signature(x="MirtarbaseidFilter", db="MirtarbaseDb"),
+          function(x, db, ...){
+              return(.requireTable("mirtarbase_id" , db))
+          })
+setMethod("column", signature(object="MirtarbaseidFilter", db="MirtarbaseDb"),
+          function(object, db, ...){
+              return("mirtarbase_id")
+          })
+setMethod("where", signature(object="MirtarbaseidFilter", db="MirtarbaseDb"),
+          function(object, db, ...){
+              suff <- callNextMethod()
+              return(paste(column(object, db), suff))
+          })
+
+##***********************************************************************
+##
 ##     Implementations for PremirnaFilter.
 ##
 ##     The mirtarbase database does not contain any pre-miRNAs, thus we're

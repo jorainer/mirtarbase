@@ -42,7 +42,7 @@ references:
 
 #+BEGIN_EXPORT html
 **Authors**: `r packageDescription("mirtarbase")$Author`<br />
-**Modified**: 15 February, 2016<br />
+**Modified**: 22 February, 2016<br />
 **Compiled**: `r date()`
 #+END_EXPORT
 
@@ -126,6 +126,8 @@ The following filter classes are used by the package (in alphabetical order):
 + =MirfamFilter=: filter the results based on miRNAs of specific miRNA families.
 + =MirfamidFilter=: filter the results based on miRNAs of specific miRNA
   families identified by their mirbase accession number.
++ =MirtarbaseidFilter=; filter the results based on the ID of the miRTarBase
+  database.
 + =PremirnaFilter=: filter the results for MTIs of mature miRNAs derived from
   the specified pre-miRNA(s).
 + =PremirnaidFilter=: filter the results for MTIs of mature miRNAs derived from
@@ -423,6 +425,51 @@ function refer to the help page of the e.g. =premirna2matmirna= function.
 #+END_SRC
 
 
+** Using =mirtarbase= in the =AnnotationDbi= framework
+
+The =mirtarbase= package implements also methods =keys=, =keytypes=, =columns=
+and =select= from the =AnnotationDbi= package that allow to query data from a
+=MirtarbaseDb= analogously to other =AnnotationDbi= objects. The supported
+columns by these methods are:
+
+#+BEGIN_SRC R
+  ## List all supported columns that can be queried.
+  columns(mirtarbase)
+
+  ## Note that these column names are different to those supported
+  ## by the mtis method:
+  listColumns(mirtarbase)
+#+END_SRC
+
+We can use the =keys= and =keytypes= methods to retrieve the supported keytypes
+for the =select= method.
+
+#+BEGIN_SRC R
+  ## List all supported keytypes
+  keytypes(mirtarbase)
+
+  ## List all keys for "Support Type"
+  keys(mirtarbase, keytype="SUPPORTTYPE")
+
+  ## Use select to retrieve all MTIs for support type "Functional MTI"
+  mtis <- select(mirtarbase, keys="Functional MTI", keytype="SUPPORTTYPE")
+  head(mtis)
+  nrow(mtis)
+#+END_SRC
+
+The =select= method for =MirtarbaseDb= allows in addition also to submit one or
+more filter objects with argument =keys=. This enables more flexible queries
+than possible with the /standard/ usage. Below we retrieve all MTIs of support
+type /Functional MTI/ for genes /BCL2/ and /BCL2L11/.
+
+#+BEGIN_SRC R
+  mtis <- select(mirtarbase, keys=list(SupportTypeFilter("Functional MTI"),
+                                       GenenameFilter(c("BCL2", "BCL2L11"))))
+  head(mtis)
+  nrow(mtis)
+#+END_SRC
+
+
 * Database layout<<section.database.layout>>
 
 The database consists of 3 tables, =mirtarbase= which contains all information
@@ -516,8 +563,14 @@ In that case =columns= is ignored.
 Column names from mirbase are misleading. Eventually map =mirna_id= to
 =premirna_name=, =mature_name= to =matmirna_name= etc.
 
-** TODO Implement the =AnnotationDbi= methods
+** TODO Implement the =AnnotationDbi= methods [5/6]
 
++ [X] =columns=.
++ [X] =keytypes=.
++ [X] =keys=.
++ [X] =select=.
++ [ ] =mapIds=.
++ [X] Add example to vignette.
 
 * References
 

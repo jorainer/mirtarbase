@@ -1,7 +1,7 @@
 Package: mirtarbase
 Type: Package
 Title: mirtarbase: a database of validated miRNA target gene interactions
-Version: 0.99.3
+Version: 0.99.4
 Author: J. Rainer
 Maintainer: Johannes Rainer <johannes.rainer@eurac.edu>
 URL: https://github.com/jotsetung/mirtarbase
@@ -15,7 +15,7 @@ Description: This package provides the validated miRNA-target interaction data f
 	     miRTarBase database and the required functionality to access and use this
 	     information.
 Collate: Generics.R Classes.R Methods.R dbhelpers.R utils.R mirbase-utils.R
-	 convertfunctions.R zzz.R
+	 convertfunctions.R select-methods.R zzz.R
 License: MIT + file LICENSE
 Copyright: miRTarBase data: ISBLab, Department of Biological Science and Technology,
 	   Institute of Bioinformatics and Systems Biology, National Chiao Tung

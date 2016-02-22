@@ -1,3 +1,11 @@
+VERSION 0.99.4
+--------------
+
+NEW FEATURES
+    o AnnotationDbi methods: columns, keys, keytypes, select.
+    o New MirtarbaseidFilter class.
+
+
 VERSION 0.99.3
 --------------
 
