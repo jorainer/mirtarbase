@@ -10,15 +10,15 @@ r_binary_packages:
   - RUnit
   - knitr
   - rmarkdown
-  - DBI
-  - RSQLite
-  - parallel
 
 bioc_packages:
   - BiocGenerics
   - S4Vectors
   - ensembldb
   - AnnotationDbi
+  - DBI
+  - RSQLite
+  - parallel
 
 r_github_packages:
   - jimhester/covr
