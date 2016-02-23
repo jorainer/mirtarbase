@@ -10,12 +10,8 @@ before_install:
   - ./pkg-build.sh bootstrap
 
 install:
-  - ./pkg-build.sh install_github jimhester/covr
   - ./pkg-build.sh install_bioc_deps
-  - ./pkg-build.sh install_github jotsetung/mirhostgenes jotsetung/MirhostDb.Hsapiens.v75.v20
-
-##  - ./pkg-build.sh install_bioc_deps
-##  - ./pkg-build.sh install_deps
+  - ./pkg-build.sh install_github jotsetung/mirhostgenes jotsetung/MirhostDb.Hsapiens.v75.v20 jimhester/covr
 
 script:
   - ./pkg-build.sh run_tests
@@ -24,9 +20,7 @@ after_failure:
   - ./pkg-build.sh dump_logs
 
 after_success:
-  - ./pkg-build.sh r_script -e 'covr::codecov()'
-
-## - Rscript -e 'library(covr);codecov()'
+  - if [[ ! -z "$COVERAGE" ]];then ./pkg-build.sh run_script -e 'covr::codecov()'; fi
 
 notifications:
   email:
@@ -41,7 +35,7 @@ notifications:
 
 env:
     global:
-      - RVERSION=devel BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGESTS_=FALSE
+      - RVERSION=devel BIOC_USE_DEVEL=TRUE _R_CHECK_FORCE_SUGGESTS_=FALSE CODECOV_TOKEN=954c3cdf-a64e-49cc-b12b-1234b199ed45 COVERAGE=true
 
 
 
