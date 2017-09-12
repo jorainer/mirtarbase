@@ -250,7 +250,8 @@
   Johannes Rainer
 }
 \seealso{
-  \code{\linkS4class{SpeciesFilter}}, \code{\linkS4class{MTI}}, \code{\linkS4class{MTIList}}
+  \code{\linkS4class{SpeciesFilter}}, \code{\linkS4class{MTI}},
+  \code{\linkS4class{MTIList}}
 }
 \examples{
 
@@ -277,10 +278,6 @@ listSupportTypes(mirtarbase)
 
 ## List all experiments
 listExperiments(mirtarbase)
-
-## Perform a SQL query on the database.
-dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase limit 2")
-
 
 ##******************************************
 ##
@@ -326,13 +323,14 @@ BCL2.df <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"),
 ## The query is much faster, but:
 nrow(BCL2.df)
 length(BCL2)
+head(BCL2.df)
 ## We get almost twice as many rows: one row in the data.frame corresponds to one
 ## publication in which a miRNA target gene interaction was detected, while each
 ## element in the list corresponds to one MTI class with the list of Report objects
 ## (i.e. publications) being stored in the report slot.
 
 ## Get all MTIs for a specific miRNA
-Test <- mtis(mirtarbase, filter=list(PremirnaFilter(c("hsa-mir-223")),
+Test <- mtis(mirtarbase, filter=list(PreMirnaFilter(c("hsa-mir-223")),
                                      SpeciesFilter("Homo sapiens")))
 length(Test)
 ## Get the gene names along with the number of supporting evidences
@@ -340,13 +338,13 @@ data.frame(gene=gene(Test), report_count=reportCount(Test))
 
 
 ## Get all MTIs for a miRNA family.
-MTIs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"), SpeciesFilter("Homo sapiens")))
+MTIs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
+                                     SpeciesFilter("Homo sapiens")))
 length(MTIs)
 MTIs
 ## Next we might want to ask if there are genes targeted by more than one miRNA
 ## of this family.
 head(sort(table(gene(MTIs)), decreasing=TRUE))
-
 
 }
 \keyword{classes}

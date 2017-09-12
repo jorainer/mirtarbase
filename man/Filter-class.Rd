@@ -5,41 +5,41 @@
 \alias{PublicationFilter-class}
 \alias{SpeciesFilter-class}
 \alias{SupportTypeFilter-class}
-\alias{MirtarbaseidFilter-class}
+\alias{MirtarbaseIdFilter-class}
 % defined in ensembldb
-\alias{column,EntrezidFilter,MirtarbaseDb-method}
-\alias{column,EntrezidFilter,MirtarbaseDb,ANY-method}
-\alias{where,EntrezidFilter,MirtarbaseDb-method}
-\alias{where,EntrezidFilter,MirtarbaseDb,ANY-method}
+\alias{column,EntrezFilter,MirtarbaseDb-method}
+\alias{column,EntrezFilter,MirtarbaseDb,ANY-method}
+\alias{where,EntrezFilter,MirtarbaseDb-method}
+\alias{where,EntrezFilter,MirtarbaseDb,ANY-method}
 \alias{column,GenenameFilter,MirtarbaseDb-method}
 \alias{column,GenenameFilter,MirtarbaseDb,ANY-method}
 \alias{where,GenenameFilter,MirtarbaseDb-method}
 \alias{where,GenenameFilter,MirtarbaseDb,ANY-method}
 % defined in mirnahostgenes
-\alias{column,MatmirnaFilter,MirtarbaseDb-method}
-\alias{column,MatmirnaFilter,MirtarbaseDb,ANY-method}
-\alias{where,MatmirnaFilter,MirtarbaseDb-method}
-\alias{where,MatmirnaFilter,MirtarbaseDb,ANY-method}
-\alias{column,MatmirnaidFilter,MirtarbaseDb-method}
-\alias{column,MatmirnaidFilter,MirtarbaseDb,ANY-method}
-\alias{where,MatmirnaidFilter,MirtarbaseDb-method}
-\alias{where,MatmirnaidFilter,MirtarbaseDb,ANY-method}
+\alias{column,MatMirnaFilter,MirtarbaseDb-method}
+\alias{column,MatMirnaFilter,MirtarbaseDb,ANY-method}
+\alias{where,MatMirnaFilter,MirtarbaseDb-method}
+\alias{where,MatMirnaFilter,MirtarbaseDb,ANY-method}
+\alias{column,MatMirnaIdFilter,MirtarbaseDb-method}
+\alias{column,MatMirnaIdFilter,MirtarbaseDb,ANY-method}
+\alias{where,MatMirnaIdFilter,MirtarbaseDb-method}
+\alias{where,MatMirnaIdFilter,MirtarbaseDb,ANY-method}
 \alias{column,MirfamFilter,MirtarbaseDb-method}
 \alias{column,MirfamFilter,MirtarbaseDb,ANY-method}
 \alias{where,MirfamFilter,MirtarbaseDb-method}
 \alias{where,MirfamFilter,MirtarbaseDb,ANY-method}
-\alias{column,MirfamidFilter,MirtarbaseDb-method}
-\alias{column,MirfamidFilter,MirtarbaseDb,ANY-method}
-\alias{where,MirfamidFilter,MirtarbaseDb-method}
-\alias{where,MirfamidFilter,MirtarbaseDb,ANY-method}
-\alias{column,PremirnaFilter,MirtarbaseDb-method}
-\alias{column,PremirnaFilter,MirtarbaseDb,ANY-method}
-\alias{where,PremirnaFilter,MirtarbaseDb-method}
-\alias{where,PremirnaFilter,MirtarbaseDb,ANY-method}
-\alias{column,PremirnaidFilter,MirtarbaseDb-method}
-\alias{column,PremirnaidFilter,MirtarbaseDb,ANY-method}
-\alias{where,PremirnaidFilter,MirtarbaseDb-method}
-\alias{where,PremirnaidFilter,MirtarbaseDb,ANY-method}
+\alias{column,MirfamIdFilter,MirtarbaseDb-method}
+\alias{column,MirfamIdFilter,MirtarbaseDb,ANY-method}
+\alias{where,MirfamIdFilter,MirtarbaseDb-method}
+\alias{where,MirfamIdFilter,MirtarbaseDb,ANY-method}
+\alias{column,PreMirnaFilter,MirtarbaseDb-method}
+\alias{column,PreMirnaFilter,MirtarbaseDb,ANY-method}
+\alias{where,PreMirnaFilter,MirtarbaseDb-method}
+\alias{where,PreMirnaFilter,MirtarbaseDb,ANY-method}
+\alias{column,PreMirnaIdFilter,MirtarbaseDb-method}
+\alias{column,PreMirnaIdFilter,MirtarbaseDb,ANY-method}
+\alias{where,PreMirnaIdFilter,MirtarbaseDb-method}
+\alias{where,PreMirnaIdFilter,MirtarbaseDb,ANY-method}
 % defined in mirtarbase
 \alias{column,ExperimentFilter,MirtarbaseDb-method}
 \alias{column,PublicationFilter,MirtarbaseDb-method}
@@ -49,19 +49,22 @@
 \alias{column,PublicationFilter,MirtarbaseDb,ANY-method}
 \alias{column,SpeciesFilter,MirtarbaseDb,ANY-method}
 \alias{column,SupportTypeFilter,MirtarbaseDb,ANY-method}
-\alias{column,MirtarbaseidFilter,MirtarbaseDb,ANY-method}
+\alias{column,MirtarbaseIdFilter,MirtarbaseDb,ANY-method}
 \alias{where,ExperimentFilter,MirtarbaseDb-method}
 \alias{where,PublicationFilter,MirtarbaseDb-method}
 \alias{where,ExperimentFilter,MirtarbaseDb,ANY-method}
 \alias{where,PublicationFilter,MirtarbaseDb,ANY-method}
-\alias{where,MirtarbaseidFilter,MirtarbaseDb,ANY-method}
+\alias{where,MirtarbaseIdFilter,MirtarbaseDb,ANY-method}
 \alias{show,SpeciesFilter,MirtarbaseDb-method}
 \alias{show,SpeciesFilter-method}
 \alias{where,SpeciesFilter,MirtarbaseDb-method}
 \alias{where,SupportTypeFilter,MirtarbaseDb-method}
 \alias{where,SpeciesFilter,MirtarbaseDb,ANY-method}
 \alias{where,SupportTypeFilter,MirtarbaseDb,ANY-method}
-\alias{where,BasicFilter,MirtarbaseDb,ANY-method}
+\alias{where,AnnotationFilter,MirtarbaseDb,ANY-method}
+\alias{where,AnnotationFilter,MirtarbaseDb,missing-method}
+\alias{where,AnnotationFilter,MirtarbaseDb,character-method}
+\alias{column,AnnotationFilter,MirtarbaseDb,ANY-method}
 \alias{column}
 \alias{where}
 
@@ -76,7 +79,7 @@
   \code{new("ExperimentFilter", ...)} users are strongly encouraged to use
   the specific functions: \code{\link{ExperimentFilter}},
   \code{\link{PublicationFilter}}, \code{\link{SpeciesFilter}},
-  \code{\link{SupportTypeFilter}} and \code{\link{MirtarbaseidFilter}}.
+  \code{\link{SupportTypeFilter}} and \code{\link{MirtarbaseIdFilter}}.
   See examples below for usage.
 }
 \section{Slots}{
@@ -112,12 +115,13 @@
   }
 }
 \section{Extends}{
-  Class \code{"BasicFilter"} defined in the \code{ensembldb} package, directly.
+  Class \code{"AnnotationFilter"} defined in the \code{AnnotationFilter} package.
 }
 \section{Methods}{
 
   (in alphabetic order)
-  All methods are applicable to all filter classes extending the \code{BasicFilter}.
+  All methods are applicable to all filter classes extending the
+  \code{AnnotationFilter}.
 
   \describe{
 
@@ -133,10 +137,6 @@
       Returns the \emph{condition} of the filter.
     }
 
-    \item{condition<-}{
-      Allows to set/change the condition of the filter.
-    }
-
     \code{show}{
       Print some information about the object.
     }
@@ -145,15 +145,12 @@
       returns value of the filter.
     }
 
-    \item{value<-}{
-      Allows to set/change the value of the filter.
-    }
-
     \item{where}{
       \code{signature(object = "ExperimentFilter", db = "MirtarbaseDb")}: returns the
-      \emph{where} clause for the SQL call to the miRTarbase database. The method can be applied to any
-      filter class defined in the \code{mirtarbase}, \code{mirnahostgenes} or
-      \code{ensembldb} packages.
+      \emph{where} condition for the SQL call to the miRTarbase database.
+      The method can be applied to any filter class defined in the
+      \code{mirtarbase}, \code{mirnahostgenes}, \code{ensembldb} or
+      \code{AnnotationFilter} packages.
     }
   }
 }
@@ -163,7 +160,7 @@
   The complete list of allowed filters is (in alphabetic order):
   \describe{
 
-    \item{EntrezidFilter}{
+    \item{EntrezFilter}{
       Filter the results for specific NCBI Entrezgene IDs.
     }
 
@@ -177,11 +174,11 @@
       Restrict the results to specific genes based on their name/symbol.
     }
 
-    \item{MatmirnaFilter}{
+    \item{MatMirnaFilter}{
       Restrict the results to specified mature miRNA names.
     }
 
-    \item{MatmirnaidFilter}{
+    \item{MatMirnaIdFilter}{
       Restrict the results to specified mature miRNA accession IDs.
     }
 
@@ -190,17 +187,17 @@
       miRNA family.
     }
 
-    \item{MirfamidFilter}{
+    \item{MirfamIdFilter}{
       Restrict the results to interactions of miRNAs from the specified
       miRNA family (ID/accession).
     }
 
-    \item{PremirnaFilter}{
+    \item{PreMirnaFilter}{
       Restrict the results to interactions of mature miRNAs derived from
       the specified pre-miRNAs (identified by their name).
     }
 
-    \item{PremirnaidFilter}{
+    \item{PreMirnaIdFilter}{
       Restrict the results to interactions of mature miRNAs derived from
       the specified pre-miRNAs (identified by their accession).
     }
@@ -220,23 +217,22 @@
       of available support types.
     }
 
-    \item{MirtarbaseidFilter}{
+    \item{MirtarbaseIdFilter}{
       Restrict the results to MTIs based on certain Mirtarbase IDs.
     }
-
   }
 }
 \note{
   The filter for experiments should ideally use as condition a
-  \code{"like"} and as value a pattern such as \code{"\%PCR\%"} to retrieve
+  \code{"contains"} and as value a pattern such as \code{"PCR"} to retrieve
   all entries for MTIs validated using PCR based methods as the
   values in the experiments column of the miRTarbase database are not
   standardized.
 
   The miRTarbase database does only provide mapping between mature miRNA
-  names and target genes, thus, \code{PremirnaFilter},
-  \code{PremirnaidFilter}, \code{MatmirnaidFilter}, \code{MirfamFilter}
-  and \code{MirfamidFilter} instances internally map the provided
+  names and target genes, thus, \code{PreMirnaFilter},
+  \code{PreMirnaIdFilter}, \code{MatMirnaIdFilter}, \code{MirfamFilter}
+  and \code{MirfamIdFilter} instances internally map the provided
   identifier to the corresponding mature miRNA names using the
   \code{mirbase.db} package (e.g. using the
   \code{\link{premirna2matmirna}} function). Note however that some
@@ -247,26 +243,28 @@
   Johannes Rainer
 }
 \seealso{
-  \code{\link[ensembldb]{GenenameFilter}}, \code{\link{premirna2matmirna}}
+  \code{\link[AnnotationFilter]{GenenameFilter}},
+  \code{\link{premirna2matmirna}}
 }
 \examples{
 
 ##***********************
 ##
-## EntrezidFilter
+## EntrezFilter
 ##***********************
 ##
-EFilt <- EntrezidFilter(123, condition="like")
+EFilt <- EntrezFilter(123, condition = "contains")
 EFilt
 ## default column of the filter
+field(EFilt)
 column(EFilt)
 ## column of the filter for the mirtarbase package:
 column(EFilt, mirtarbase)
 ## and the where query:
 where(EFilt, mirtarbase)
 
-## EntrezidFilter with more than one value:
-EFilt <- EntrezidFilter(c(123, 3435))
+## EntrezFilter with more than one value:
+EFilt <- EntrezFilter(c(123, 3435))
 EFilt
 where(EFilt, mirtarbase)
 
@@ -281,7 +279,7 @@ EFilt <- ExperimentFilter("PCR")
 column(EFilt, mirtarbase)
 where(EFilt, mirtarbase)
 
-EFilt <- ExperimentFilter(c("PCR"), condition="like")
+EFilt <- ExperimentFilter(c("PCR"), condition = "contains")
 where(EFilt, mirtarbase)
 
 ## a good starting point is to list all experiments from the database
@@ -304,10 +302,10 @@ where(GFilt, mirtarbase)
 
 ##***********************
 ##
-## MatmirnaFilter
+## MatMirnaFilter
 ##***********************
 ## mature miRNA filter
-MFilt <- MatmirnaFilter(c("hsa-miR-16-5p", "hsa-miR-16-3p"))
+MFilt <- MatMirnaFilter(c("hsa-miR-16-5p", "hsa-miR-16-3p"))
 MFilt
 ## and in the mirtarbase package
 column(MFilt, mirtarbase)
@@ -374,42 +372,42 @@ listSupportTypes(mirtarbase)
 
 ##***********************
 ##
-## PremirnaFilter
+## PreMirnaFilter
 ##***********************
 ## pre miRNA filter.
-## Note that the PremirnaFilter methods for MirtarbaseDb internally map the pre-miRNA name
+## Note that the PreMirnaFilter methods for MirtarbaseDb internally map the pre-miRNA name
 ## to mature miRNA names based on the mirbase.db package, as the
 ## miRTarbase database does not provide pre-miRNA ids.
-PF <- PremirnaFilter(c("bla", "hsa-mir-15b"))
+PF <- PreMirnaFilter(c("bla", "hsa-mir-15b"))
 ## the where internally maps the pre-miRNA ID to the corresponding mature miRNA ID(s)
 where(PF, mirtarbase)
 
 ## what if nothing was found...
-PF <- PremirnaFilter("baf")
+PF <- PreMirnaFilter("baf")
 where(PF, mirtarbase)
 ## returns nothing
 
-PF <- PremirnaFilter(c("bla", "hsa-mir-15b"), condition="!=")
+PF <- PreMirnaFilter(c("bla", "hsa-mir-15b"), condition="!=")
 where(PF, mirtarbase)
 
 ##
-PF <- PremirnaFilter("hsa-mir-15b")
+PF <- PreMirnaFilter("hsa-mir-15b")
 where(PF , mirtarbase)
 
 
 ##***********************
 ##
-## PremirnaidFilter
+## PreMirnaIdFilter
 ##***********************
-PF <- PremirnaidFilter("MI0000070")
+PF <- PreMirnaIdFilter("MI0000070")
 where(PF, mirtarbase)
 
 
 ##***********************
 ##
-## MatmirnaidFilter
+## MatMirnaIdFilter
 ##***********************
-MF <- MatmirnaidFilter("MIMAT0004489", "!=")
+MF <- MatMirnaIdFilter("MIMAT0004489", "!=")
 where(MF, mirtarbase)
 
 
@@ -423,9 +421,9 @@ where(MF, mirtarbase)
 
 ##***********************
 ##
-## MirfamidFilter
+## MirfamIdFilter
 ##***********************
-MF <- MirfamidFilter("MIPF0000006")
+MF <- MirfamIdFilter("MIPF0000006")
 where(MF, mirtarbase)
 
 

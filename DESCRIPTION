@@ -1,19 +1,20 @@
 Package: mirtarbase
 Type: Package
 Title: mirtarbase: a database of validated miRNA target gene interactions
-Version: 0.99.4
+Version: 0.99.10
 Author: J. Rainer
 Maintainer: Johannes Rainer <johannes.rainer@eurac.edu>
 URL: https://github.com/jotsetung/mirtarbase
-Depends: BiocGenerics, S4Vectors, ensembldb, mirhostgenes
+Depends: BiocGenerics, S4Vectors, ensembldb, mirhostgenes (>= 0.99.10),
+	 AnnotationFilter
 Imports: methods, DBI, RSQLite, AnnotationDbi, mirbase.db, parallel,
 	 utils
 Suggests: BiocStyle, knitr, RUnit, rmarkdown
 VignetteBuilder: knitr
 biocViews: Annotation, miRNA
-Description: This package provides the validated miRNA-target interaction data from the
-	     miRTarBase database and the required functionality to access and use this
-	     information.
+Description: This package provides the validated miRNA-target interaction data
+	     from the miRTarBase database and the required functionality to
+	     access and use this information.
 Collate: Generics.R Classes.R Methods.R dbhelpers.R utils.R mirbase-utils.R
 	 convertfunctions.R select-methods.R zzz.R
 License: MIT + file LICENSE

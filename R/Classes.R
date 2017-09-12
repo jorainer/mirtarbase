@@ -147,110 +147,70 @@ new_SimpleList_from_list <- function(Class, x, ..., mcols)
 ##
 ##***********************************************************************
 ## filter for species
-setClass("ExperimentFilter", contains="BasicFilter",
-         prototype=list(
-             condition="=",
+setClass("ExperimentFilter", contains="CharacterFilter",
+         prototype = list(
+             condition = "==",
              value="",
-             valueIsCharacter=TRUE
+             field = "experiment"
          )
          )
-ExperimentFilter <- function(value, condition="="){
-    if(missing(value)){
-        stop("A filter without a value makes no sense!")
-    }
-    if(length(value) > 1){
-        if(condition=="=")
-            condition="in"
-        if(condition=="!=")
-            condition="not in"
-    }
-    return(new("ExperimentFilter", condition=condition, value=as.character(value)))
+ExperimentFilter <- function(value, condition = "=="){
+    return(new("ExperimentFilter", condition = condition,
+               value=as.character(value)))
 }
 
 ## filter for species
-setClass("PublicationFilter", contains="BasicFilter",
+setClass("PublicationFilter", contains="CharacterFilter",
          prototype=list(
-             condition="=",
-             value="",
-             valueIsCharacter=TRUE
+             condition = "==",
+             value = "",
+             field = "pmid"
          )
          )
-PublicationFilter <- function(value, condition="="){
-    if(missing(value)){
-        stop("A filter without a value makes no sense!")
-    }
-    if(length(value) > 1){
-        if(condition=="=")
-            condition="in"
-        if(condition=="!=")
-            condition="not in"
-    }
-    return(new("PublicationFilter", condition=condition, value=as.character(value)))
+PublicationFilter <- function(value, condition = "=="){
+    return(new("PublicationFilter", condition=condition,
+               value=as.character(value)))
 }
 
 ## filter for species
-setClass("SpeciesFilter", contains="BasicFilter",
+setClass("SpeciesFilter", contains="CharacterFilter",
          representation(feature="character"),
          prototype=list(
-             feature="gene",
-             condition="=",
+             feature = "gene",
+             condition = "==",
              value="",
-             valueIsCharacter=TRUE
+             field = "species"
          )
          )
-SpeciesFilter <- function(value, condition="=", feature="gene"){
+SpeciesFilter <- function(value, condition = "==", feature = "gene"){
     feature <- match.arg(feature, c("gene", "mirna"))
-    if(missing(value)){
-        stop("A filter without a value makes no sense!")
-    }
-    if(length(value) > 1){
-        if(condition=="=")
-            condition="in"
-        if(condition=="!=")
-            condition="not in"
-    }
-    return(new("SpeciesFilter", condition=condition, value=as.character(value), feature=feature))
+    return(new("SpeciesFilter", condition=condition,
+               value=as.character(value), feature=feature))
 }
 
 ## filter for species
-setClass("SupportTypeFilter", contains="BasicFilter",
+setClass("SupportTypeFilter", contains="CharacterFilter",
          prototype=list(
-             condition="=",
-             value="",
-             valueIsCharacter=TRUE
+             condition = "==",
+             value = "",
+             field = "support_type"
          )
          )
-SupportTypeFilter <- function(value, condition="="){
-    if(missing(value)){
-        stop("A filter without a value makes no sense!")
-    }
-    if(length(value) > 1){
-        if(condition=="=")
-            condition="in"
-        if(condition=="!=")
-            condition="not in"
-    }
-    return(new("SupportTypeFilter", condition=condition, value=as.character(value)))
+SupportTypeFilter <- function(value, condition = "=="){
+    return(new("SupportTypeFilter", condition=condition,
+               value=as.character(value)))
 }
 
 ## filter for species
-setClass("MirtarbaseidFilter", contains="BasicFilter",
+setClass("MirtarbaseIdFilter", contains="CharacterFilter",
          prototype=list(
-             condition="=",
-             value="",
-             valueIsCharacter=TRUE
+             condition = "==",
+             value = "",
+             field = "mirtarbase_id"
          )
          )
-MirtarbaseidFilter <- function(value, condition="="){
-    if(missing(value)){
-        stop("A filter without a value makes no sense!")
-    }
-    if(length(value) > 1){
-        if(condition=="=")
-            condition="in"
-        if(condition=="!=")
-            condition="not in"
-    }
-    return(new("MirtarbaseidFilter", condition=condition, value=as.character(value)))
+MirtarbaseIdFilter <- function(value, condition = "=="){
+    return(new("MirtarbaseIdFilter", condition=condition,
+               value=as.character(value)))
 }
 

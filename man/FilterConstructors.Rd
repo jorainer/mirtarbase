@@ -3,7 +3,7 @@
 \alias{PublicationFilter}
 \alias{SpeciesFilter}
 \alias{SupportTypeFilter}
-\alias{MirtarbaseidFilter}
+\alias{MirtarbaseIdFilter}
 \title{
   Constructor functions for filter objects
 }
@@ -12,19 +12,18 @@
   retrieve specific elements from the annotation database.
 }
 \usage{
-ExperimentFilter(value, condition = "=" )
-PublicationFilter(value, condition = "=" )
-SpeciesFilter(value, condition = "=", feature="gene" )
-SupportTypeFilter(value, condition = "=" )
-MirtarbaseidFilter(value, condition="=")
+ExperimentFilter(value, condition = "==" )
+PublicationFilter(value, condition = "==" )
+SpeciesFilter(value, condition = "==", feature="gene" )
+SupportTypeFilter(value, condition = "==" )
+MirtarbaseIdFilter(value, condition="==")
 }
 \arguments{
   \item{condition}{
     The condition to be used in the comparison. For character values
-    \code{"="}, \code{"in"} and \code{"like"} are allowed, for numeric values
+    \code{"="}, \code{"in"} and \code{"contains"} are allowed, for numeric values
     (\code{SeqstartFilter} and \code{SeqendFilter}) \code{"="},
-    \code{">"}, \code{">="}, \code{"<"} and \code{"<="}. Note that for
-    \code{"like"} \code{value} should be a SQL pattern (e.g. \code{"ENS\%"}).
+    \code{">"}, \code{">="}, \code{"<"} and \code{"<="}.
   }
 
   \item{feature}{
@@ -47,7 +46,7 @@ MirtarbaseidFilter(value, condition="=")
   \code{\linkS4class{PublicationFilter}},
   \code{\linkS4class{SpeciesFilter}},
   \code{\linkS4class{SupportTypeFilter}},
-  \code{\linkS4class{MirtarbaseidFilter}}
+  \code{\linkS4class{MirtarbaseIdFilter}}
 }
 \author{
   Johannes Rainer
@@ -57,7 +56,7 @@ MirtarbaseidFilter(value, condition="=")
   \code{\linkS4class{PublicationFilter}},
   \code{\linkS4class{SpeciesFilter}},
   \code{\linkS4class{SupportTypeFilter}}
-  \code{\link[ensembldb]{GenenameFilter}}
+  \code{\link[AnnotationFilter]{GenenameFilter}}
 }
 \examples{
 

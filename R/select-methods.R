@@ -62,17 +62,19 @@ setMethod("keytypes", "MirtarbaseDb",
 )
 ## returns a vector mapping keytypes (names of vector) to filter names (elements).
 .keytype2FilterMapping <- function(){
-    filters <- c("EntrezidFilter", "GenenameFilter", "MatmirnaFilter", "SpeciesFilter",
-                 "SpeciesFilter", "ExperimentFilter", "PublicationFilter", "SupportTypeFilter",
-                 "MirtarbaseidFilter")
-    names(filters) <- c("ENTREZID", "SYMBOL", "MATMIRNA", "GENESPECIES", "MIRNASPECIES",
-                        "EXPERIMENT", "PMID", "SUPPORTTYPE", "MIRTARBASEID")
+    filters <- c("EntrezFilter", "GenenameFilter", "MatMirnaFilter",
+                 "SpeciesFilter", "SpeciesFilter", "ExperimentFilter",
+                 "PublicationFilter", "SupportTypeFilter", "MirtarbaseIdFilter")
+    names(filters) <- c("ENTREZID", "SYMBOL", "MATMIRNA", "GENESPECIES",
+                        "MIRNASPECIES", "EXPERIMENT", "PMID", "SUPPORTTYPE",
+                        "MIRTARBASEID")
     return(filters)
 }
 filterForKeytype <- function(keytype){
     if(length(keytype) > 1){
         keytype <- keytype[1]
-        warning("Multiple keytype values are not supported! Using only the first keytype.")
+        warning("Multiple keytype values are not supported! Using only the ",
+                "first keytype.")
     }
     filters <- .keytype2FilterMapping()
     if(any(names(filters) == keytype)){
@@ -142,14 +144,17 @@ setMethod("select", "MirtarbaseDb",
         ## Get everything from the database...
         keys <- list()
     }else{
-        if(!(is(keys, "character") | is(keys, "list") | is(keys, "BasicFilter")))
-            stop("Argument keys should be a character vector, an object extending BasicFilter ",
-                 "or a list of objects extending BasicFilter.")
+        if(!(is(keys, "character") | is(keys, "list") |
+             is(keys, "AnnotationFilter")))
+            stop("Argument keys should be a character vector, an object ",
+                 "extending AnnotationFilter or a list of objects extending ",
+                 "AnnotationFilter.")
         if(is(keys, "list")){
-            if(!all(vapply(keys, is, logical(1L), "BasicFilter")))
-                stop("If keys is a list it should be a list of objects extending BasicFilter!")
+            if(!all(vapply(keys, is, logical(1L), "AnnotationFilter")))
+                stop("If keys is a list it should be a list of objects ",
+                     "extending AnnotationFilter!")
         }
-        if(is(keys, "BasicFilter")){
+        if(is(keys, "AnnotationFilter")){
             keys <- list(keys)
         }
         if(is(keys, "character")){
@@ -162,7 +167,7 @@ setMethod("select", "MirtarbaseDb",
                      " Use keytypes method to list all available keytypes.")
             ## Generate a filter object for the filters.
             keyFilter <- filterForKeytype(keytype)
-            value(keyFilter) <- keys
+            keyFilter@value <- keys
             keys <- list(keyFilter)
             ## Add also the keytype itself to the columns.
             if(!any(columns == keytype))

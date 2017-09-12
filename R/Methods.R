@@ -197,18 +197,18 @@ setMethod("mtis", "MirtarbaseDb", function(x, columns=listColumns(x, "mirtarbase
         return(list())
     if(is(filter, "list")){
         isAFilter <- unlist(lapply(filter, function(z){
-            return(is(z, "BasicFilter"))
+            return(is(z, "AnnotationFilter"))
         }))
         if(!all(isAFilter))
-            stop("Argument 'filter' has to be a single 'BasicFilter object or a list",
-                 " of such objects!")
+            stop("Argument 'filter' has to be a single 'AnnotationFilter'",
+                 " object or a list of such objects!")
         return(filter)
     }else{
-        if(is(filter, "BasicFilter")){
+        if(is(filter, "AnnotationFilter")){
             return(list(filter))
         }else{
-            stop("Argument 'filter' has to be a single 'BasicFilter object or a list",
-                 " of such objects!")
+            stop("Argument 'filter' has to be a single 'AnnotationFilter' ",
+                 "object or a list of such objects!")
         }
     }
 }
@@ -559,6 +559,65 @@ setMethod("as.data.frame", "MTIReport",
 ##
 ##     Filter classes:
 ##
+## setMethod("where", signature(object="AnnotationFilter", db="MirtarbaseDb",
+##                              with.tables="missing"),
+##           function(object, db, with.tables, ...){
+##               ## just call the plain method without database.
+##               .where(object)
+##           })
+## setMethod("where", signature(object="AnnotationFilter", db="MirtarbaseDb",
+##                              with.tables="character"),
+##           function(object, db, with.tables, ...){
+##               ## just call the plain method without database.
+##               .where(object)
+##           })
+## setMethod("where", signature(object = "AnnotationFilter", db = "missing",
+##                              with.tables = "missing"),
+##           function(object, db, with.tabbles, ...) {
+##               .where(object)
+##           })
+## setMethod("column", signature(object = "AnnotationFilter", db = "missing",
+##                               with.tables = "missing"),
+##           function(object, db, with.tables, ...){
+##               field(object)
+##           })
+
+.where <- function(x) {
+    ## field condition value
+    paste0(.condition(x), .value(x))
+}
+.condition <- function(x) {
+    cond <- condition(x)
+    if (length(unique(value(x))) > 1) {
+        if (cond == "==")
+            cond <- "in "
+        if (cond == "!=")
+            cond <- "not in "
+    }
+    if (cond == "==")
+        cond <- "="
+    if (cond %in% c("startsWith", "endsWith", "contains"))
+        cond <- "like "
+    cond    
+}
+.value <- function(x) {
+    vals <- unique(value(x))
+    if (is(x, "CharacterFilter")) {
+        vals <- sQuote(gsub(unique(vals), pattern = "'", replacement = "''"))
+    }
+    if (length(vals) > 1)
+        vals <- paste0("(",  paste0(vals, collapse = ","), ")")
+    ## Process the like/startsWith/endsWith
+    if (condition(x) == "startsWith")
+        vals <- paste0("'", unique(x@value), "%'")
+    if (condition(x) == "endsWith")
+        vals <- paste0("'%", unique(x@value), "'")
+    if (condition(x) == "contains")
+        vals <- paste0("'%", unique(x@value), "%'")
+    vals
+}
+
+
 ##***********************************************************************
 ##
 ##     ExperimentFilter
@@ -578,8 +637,7 @@ setMethod("column", signature(object="ExperimentFilter", db="MirtarbaseDb"),
           })
 setMethod("where", signature(object="ExperimentFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -597,8 +655,7 @@ setMethod("column", signature(object="PublicationFilter", db="MirtarbaseDb"),
           })
 setMethod("where", signature(object="PublicationFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -636,8 +693,7 @@ setMethod("where", signature(object="SpeciesFilter", db="MirtarbaseDb"),
                           "not known to the database! Use the listSpecies function",
                           " to get all supported species names.")
               }
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 setMethod("show", "SpeciesFilter", function(object){
     callNextMethod()
@@ -663,23 +719,7 @@ setMethod("where", signature(object="SupportTypeFilter", db="MirtarbaseDb"),
                           " the database! Use the listSupportTypes function",
                           " to get all support types.")
               }
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
-          })
-
-
-
-
-
-##***********************************************************************
-##
-##     Classes imported from ensembldb
-##
-##***********************************************************************
-setMethod("where", signature(object="BasicFilter", db="MirtarbaseDb"),
-          function(object, db){
-              ## just call the plain method without database.
-              return(ensembldb:::.where(object))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -698,10 +738,9 @@ setMethod("column", signature(object="GenenameFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("target_gene")
           })
-setMethod("where", signature(object="GenenameFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object = "GenenameFilter", db = "MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 
@@ -713,18 +752,17 @@ setMethod("where", signature(object="GenenameFilter", db="MirtarbaseDb"),
 ##     in ensembldb
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="EntrezidFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="EntrezFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("target_gene_entrez_gene_id" , db))
           })
-setMethod("column", signature(object="EntrezidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="EntrezFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("target_gene_entrez_gene_id")
           })
-setMethod("where", signature(object="EntrezidFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="EntrezFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 
@@ -736,18 +774,17 @@ setMethod("where", signature(object="EntrezidFilter", db="MirtarbaseDb"),
 ##     in mirnahostgenes
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="MatmirnaFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="MatMirnaFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirna" , db))
           })
-setMethod("column", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MatMirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
-setMethod("where", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="MatMirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -758,18 +795,17 @@ setMethod("where", signature(object="MatmirnaFilter", db="MirtarbaseDb"),
 ##     in ensembldb
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="MirtarbaseidFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="MirtarbaseIdFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirtarbase_id" , db))
           })
-setMethod("column", signature(object="MirtarbaseidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MirtarbaseIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirtarbase_id")
           })
-setMethod("where", signature(object="MirtarbaseidFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="MirtarbaseIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -780,32 +816,31 @@ setMethod("where", signature(object="MirtarbaseidFilter", db="MirtarbaseDb"),
 ##     using the mirtarbase for the mapping.
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="PremirnaFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="PreMirnaFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("premirna", db))
           })
-setMethod("column", signature(object="PremirnaFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="PreMirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
-setMethod("where", signature(object="PremirnaFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="PreMirnaFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              ## we're allowing only "=", "in" and "like"!
-              ## if(!(object@condition %in% c("=", "in", "like")))
-              ##     stop(paste0("Condition ", object@condition, " is not supported! Only \"=\", \"in\" and \"like\" are allowed for PremirnaFilter!"))
               ## Now I've got to map the pre-miRNA name to mature miRNA name(s)
               Mats <- premirna2matmirna(object@value)
               NAs <- is.na(Mats[ , 2 ])
               ## show a warning if the ID was not found!
               if(any(NAs))
-                  warning(paste0("pre-miRNA(s) ", paste(Mats[ NAs, 1 ], collapse=", "), " not found in mirbase version ", mirbase.version(), "."))
+                  warning(paste0("pre-miRNA(s) ",
+                                 paste(Mats[ NAs, 1 ], collapse=", "),
+                                 " not found in mirbase version ",
+                                 mirbase.version(), "."))
               Matmirnas <- Mats[ !NAs, 2 ]
               ## return nothing if no miRNA left...
               if(length(Matmirnas)==0)
                   return(NULL)
               object@value <- Matmirnas
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 ##***********************************************************************
@@ -816,32 +851,31 @@ setMethod("where", signature(object="PremirnaFilter", db="MirtarbaseDb"),
 ##     using the mirtarbase for the mapping.
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="PremirnaidFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="PreMirnaIdFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("premirna_id", db))
           })
-setMethod("column", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="PreMirnaIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
-setMethod("where", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="PreMirnaIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              ## we're allowing only "=", "in" and "like"!
-              ## if(!(object@condition %in% c("=", "in", "!=", "not in", "like", "not like")))
-              ##     stop(paste0("Condition ", object@condition, " is not supported! Only \"=\", \"!=\", \"in\", \"not in\", \"like\" and \"not like\" are allowed for PremirnaFilter!"))
               ## Now I've got to map the pre-miRNA accessions to mature miRNA name(s)
               Mats <- premirnaAcc2matmirna(object@value)
               NAs <- is.na(Mats[ , 2 ])
               ## show a warning if the ID was not found!
               if(any(NAs))
-                  warning(paste0("pre-miRNA(s) ", paste(Mats[ NAs, 1 ], collapse=", "), " not found in mirbase version ", mirbase.version(), "."))
+                  warning(paste0("pre-miRNA(s) ",
+                                 paste(Mats[ NAs, 1 ], collapse=", "),
+                                 " not found in mirbase version ",
+                                 mirbase.version(), "."))
               Matmirnas <- Mats[ !NAs, 2 ]
               ## return nothing if no miRNA left...
               if(length(Matmirnas)==0)
                   return(NULL)
               object@value <- Matmirnas
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 
@@ -853,29 +887,32 @@ setMethod("where", signature(object="PremirnaidFilter", db="MirtarbaseDb"),
 ##     using the mirtarbase for the mapping.
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="MatmirnaidFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="MatMirnaIdFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("matmirna_id", db))
           })
-setMethod("column", signature(object="MatmirnaidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MatMirnaIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
-setMethod("where", signature(object="MatmirnaidFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="MatMirnaIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              ## Now I've got to map the mature miRNA accessions to mature miRNA name(s)
+              ## Now I've got to map the mature miRNA accessions to mature
+              ## miRNA name(s)
               Mats <- matmirnaAcc2matmirna(object@value)
               NAs <- is.na(Mats[ , 2 ])
               ## show a warning if the ID was not found!
               if(any(NAs))
-                  warning(paste0("mature miRNA accession(s) ", paste(Mats[ NAs, 1 ], collapse=", "), " not found in mirbase version ", mirbase.version(), "."))
+                  warning(paste0("mature miRNA accession(s) ",
+                                 paste(Mats[ NAs, 1 ], collapse=", "),
+                                 " not found in mirbase version ",
+                                 mirbase.version(), "."))
               Matmirnas <- Mats[ !NAs, 2 ]
               ## return nothing if no miRNA left...
               if(length(Matmirnas)==0)
                   return(NULL)
               object@value <- Matmirnas
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 
@@ -897,19 +934,22 @@ setMethod("column", signature(object="MirfamFilter", db="MirtarbaseDb"),
           })
 setMethod("where", signature(object="MirfamFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              ## Now I've got to map the mature miRNA accessions to mature miRNA name(s)
+              ## Now I've got to map the mature miRNA accessions to mature
+              ## miRNA name(s)
               Mats <- mirfam2matmirna(object@value)
               NAs <- is.na(Mats[ , 2 ])
               ## show a warning if the ID was not found!
               if(any(NAs))
-                  warning(paste0("mirfam name(s) ", paste(Mats[ NAs, 1 ], collapse=", "), " not found in mirbase version ", mirbase.version(), "."))
+                  warning(paste0("mirfam name(s) ",
+                                 paste(Mats[ NAs, 1 ], collapse=", "),
+                                 " not found in mirbase version ",
+                                 mirbase.version(), "."))
               Matmirnas <- Mats[ !NAs, 2 ]
               ## return nothing if no miRNA left...
               if(length(Matmirnas)==0)
                   return(NULL)
               object@value <- Matmirnas
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 
@@ -921,29 +961,32 @@ setMethod("where", signature(object="MirfamFilter", db="MirtarbaseDb"),
 ##     using the mirtarbase for the mapping.
 ##
 ##***********************************************************************
-setMethod("requireTable", signature(x="MirfamidFilter", db="MirtarbaseDb"),
+setMethod("requireTable", signature(x="MirfamIdFilter", db="MirtarbaseDb"),
           function(x, db, ...){
               return(.requireTable("mirfam_name", db))
           })
-setMethod("column", signature(object="MirfamidFilter", db="MirtarbaseDb"),
+setMethod("column", signature(object="MirfamIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
               return("mirna")
           })
-setMethod("where", signature(object="MirfamidFilter", db="MirtarbaseDb"),
+setMethod("where", signature(object="MirfamIdFilter", db="MirtarbaseDb"),
           function(object, db, ...){
-              ## Now I've got to map the mature miRNA accessions to mature miRNA name(s)
+              ## Now I've got to map the mature miRNA accessions to mature
+              ## miRNA name(s)
               Mats <- mirfamAcc2matmirna(object@value)
               NAs <- is.na(Mats[ , 2 ])
               ## show a warning if the ID was not found!
               if(any(NAs))
-                  warning(paste0("mirfam accession(s) ", paste(Mats[ NAs, 1 ], collapse=", "), " not found in mirbase version ", mirbase.version(), "."))
+                  warning(paste0("mirfam accession(s) ",
+                                 paste(Mats[ NAs, 1 ], collapse=", "),
+                                 " not found in mirbase version ",
+                                 mirbase.version(), "."))
               Matmirnas <- Mats[ !NAs, 2 ]
               ## return nothing if no miRNA left...
               if(length(Matmirnas)==0)
                   return(NULL)
               object@value <- Matmirnas
-              suff <- callNextMethod()
-              return(paste(column(object, db), suff))
+              paste(column(object, db), .where(object))
           })
 
 

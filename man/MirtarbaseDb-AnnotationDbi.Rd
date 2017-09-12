@@ -47,7 +47,7 @@
   \item{keys}{
     The keys/ids for which data should be retrieved from the
     database. This can be either a character vector of keys/IDs, a
-    single filter object extending \code{\linkS4class{BasicFilter}} or a
+    single filter object extending \code{\linkS4class{AnnotationFilter}} or a
     list of such objects. For the latter case it is possible to combine
     filters and thus perform more specific queries.
   }
@@ -56,14 +56,14 @@
     For \code{select}: the type (column) that matches
     the provided keys. This argument does not have to be specified if
     argument \code{keys} is a filter object extending
-    \code{\linkS4class{BasicFilter}} or a \code{list} of such objects.
+    \code{\linkS4class{AnnotationFilter}} or a \code{list} of such objects.
 
     For \code{keys}: which keys should be returned from the database.
   }
 
   \item{filter}{
     For \code{keys}: either a single object extending
-    \code{\linkS4class{BasicFilter}} or a list of such object to
+    \code{\linkS4class{AnnotationFilter}} or a list of such object to
     retrieve only specific keys from the database.
   }
 
@@ -131,7 +131,7 @@
       arguments. Multiple matches of the keys are returned in one row
       for each possible match. Argument \code{keys} can be either a
       character vector of keys/IDs, a single filter object extending
-      \code{\linkS4class{BasicFilter}} or a list of such objects. For
+      \code{\linkS4class{AnnotationFilter}} or a list of such objects. For
       the latter, the argument \code{keytype} does not have to be
       specified.
 
@@ -150,7 +150,7 @@
   Johannes Rainer
 }
 \seealso{
-  \code{\linkS4class{MirtarbaseidFilter}}
+  \code{\linkS4class{MirtarbaseIdFilter}}
   \code{\link{listColumns}}
   \code{\link{mtis}}
 }

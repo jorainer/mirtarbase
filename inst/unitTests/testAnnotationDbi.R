@@ -13,16 +13,20 @@ test_columns <- function(){
     ## Check mappings
     mapped <- mirtarbase:::.mapCols2Mirtarbase(c("ENTREZID", "MATMIRNA",
                                                  "PMID"))
-    checkEquals(mapped, c("target_gene_entrez_gene_id", "mirna", "references_pmid"))
+    checkEquals(mapped, c("target_gene_entrez_gene_id", "mirna",
+                          "references_pmid"))
     ## Check exception
-    checkException(mirtarbase:::.mapCols2Mirtarbase(c("ENTREZID", "PREMIRNANAME")))
+    checkException(mirtarbase:::.mapCols2Mirtarbase(c("ENTREZID",
+                                                      "PREMIRNANAME")))
 
     ## Reverse mapping
-    mapped <- mirtarbase:::.mapMirtarbase2Cols(c("species_target_gene", "mirtarbase_id",
+    mapped <- mirtarbase:::.mapMirtarbase2Cols(c("species_target_gene",
+                                                 "mirtarbase_id",
                                                  "support_type"))
     checkEquals(mapped, c("GENESPECIES", "MIRTARBASEID", "SUPPORTTYPE"))
     ## Check exception
-    checkException(mirtarbase:::.mapMirtarbase2Cols(c("mirtarbase_id", "don't exist")))
+    checkException(mirtarbase:::.mapMirtarbase2Cols(c("mirtarbase_id",
+                                                      "don't exist")))
 }
 
 test_filter4cols <- function(){
@@ -38,9 +42,12 @@ test_filter4cols <- function(){
     checkTrue(is(filts, "SpeciesFilter"))
     checkTrue(filts@feature == "mirna")
     ## Other filters
-    checkTrue(is(mirtarbase:::filterForKeytype("SUPPORTTYPE"), "SupportTypeFilter"))
-    checkTrue(is(mirtarbase:::filterForKeytype("EXPERIMENT"), "ExperimentFilter"))
-    checkTrue(is(mirtarbase:::filterForKeytype("MIRTARBASEID"), "MirtarbaseidFilter"))
+    checkTrue(is(mirtarbase:::filterForKeytype("SUPPORTTYPE"),
+                 "SupportTypeFilter"))
+    checkTrue(is(mirtarbase:::filterForKeytype("EXPERIMENT"),
+                 "ExperimentFilter"))
+    checkTrue(is(mirtarbase:::filterForKeytype("MIRTARBASEID"),
+                 "MirtarbaseIdFilter"))
     ## Filters defined in ensembldb
     checkTrue(is(mirtarbase:::filterForKeytype("SYMBOL"), "GenenameFilter"))
     checkTrue(is(mirtarbase:::filterForKeytype("ENTREZID"), "EntrezidFilter"))

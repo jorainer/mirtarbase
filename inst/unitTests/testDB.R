@@ -1,46 +1,25 @@
 ## some basic tests for methods of the database.
-## detachem <- function(x){
-##     NS <- loadedNamespaces()
-##     if(any(NS==x)){
-##         pkgn <- paste0("package:", x)
-##         detach(pkgn, unload=TRUE, character.only=TRUE)
-##     }
-## }
-## Pkgs <- c("mirtarbase")
-## tmp <- sapply(Pkgs, detachem)
-## tmp <- sapply(Pkgs, library, character.only=TRUE)
 
 test_loadDb <- function(){
-
     ## DB information
     mirtarbase
-
     ## version
-    version(mirtarbase)
-
+    checkTrue(length(version(mirtarbase)) > 0)
     ## what attributes do we have?
-    listColumns(mirtarbase)
-
+    checkTrue(length(listColumns(mirtarbase)) > 0)
     ## what tables
-    listTables(mirtarbase)
-
+    checkTrue(length(listTables(mirtarbase)) > 0)
     ## list all species for target genes
     checkTrue(any(listSpecies(mirtarbase, "gene")=="Homo sapiens"))
-
     ## list all species for miRNAs
-    listSpecies(mirtarbase, "mirna")
-
+    checkTrue(length(listSpecies(mirtarbase, "mirna")) > 0)
     ## list all MTI support types
-    listSupportTypes(mirtarbase)
-
+    checkTrue(length(listSupportTypes(mirtarbase)) > 0)
     ## list all experiments
-    listExperiments(mirtarbase)
-
+    checkTrue(length(listExperiments(mirtarbase)) > 0)
     ## species data frame.
     tmp <- mirtarbase:::getSpeciesDF()
     head(tmp)
-
-    ## perform a SQL query on the database.
-    dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase limit 2")
+    checkTrue(nrow(tmp) > 0)    
 }
 

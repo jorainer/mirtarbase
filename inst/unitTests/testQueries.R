@@ -1,6 +1,7 @@
 
 ## can we use regexp???
-## no way! they would have to be registered using the sqlite3_create_function which doesn't seem to be accessible through RSQLite.
+## no way! they would have to be registered using the sqlite3_create_function
+## which doesn't seem to be accessible through RSQLite.
 ## example; http://www.blackdogfoundry.com/blog/supporting-regular-expressions-in-sqlite/
 ## dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase limit 3")
 ## dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase where target_gene regexp '^DUS'")
@@ -8,9 +9,12 @@
 
 ## We're not testing anything specific here, just trying to get no error.
 test_unsorted <- function(){
+    library(RSQLite)
     SF <- SpeciesFilter("Mus musculus")
     SF
-    Q <- mirtarbase:::.buildQuery(mirtarbase, filter=list(SF))
+    Q <- mirtarbase:::.buildQuery(mirtarbase,
+                                  columns = listColumns(mirtarbase, "mirtarbase"),
+                                  filter=list(SF))
     Q
     tmp <- dbGetQuery(dbconn(mirtarbase), Q)
     head(tmp)
@@ -18,23 +22,28 @@ test_unsorted <- function(){
 
 
     ## do something more specific: get all for hsa-miR-16-5p.
-    F <- MatmirnaFilter("hsa-miR-16-5p")
-    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F))
+    F <- MatMirnaFilter("hsa-miR-16-5p")
+    cls <- listColumns(mirtarbase, "mirtarbase")
+    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F), columns = cls)
     nrow(Res)
 
     ## well ... way too many...
     F <- GenenameFilter("BCL2L11")
-    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F))
+    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F), columns = cls)
     nrow(Res)
     Res
     ## as we see, the query is performed case insensitive! If we don't want that
     ## we have to say match.case=TRUE
-    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F), match.case=TRUE)
+    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F), match.case=TRUE,
+                                 columns = cls)
     nrow(Res)
     Res
     ## or restrict to human genes only would also do it...
-    Res <- mirtarbase:::.getWhat(mirtarbase, filter=list(F,
-                                                         SpeciesFilter("Homo sapiens", feature="gene")), order.by="mirna")
+    Res <- mirtarbase:::.getWhat(mirtarbase,
+                                 filter=list(F,
+                                             SpeciesFilter("Homo sapiens",
+                                                           feature="gene")),
+                                 order.by="mirna", columns = cls)
     nrow(Res)
     Res
     ## we get now however duplicated miRNA-target gene pairs, one for each publication
@@ -43,7 +52,8 @@ test_unsorted <- function(){
 
     ## check the performance of mclapply vs normal apply...
     ## 10 rows
-    Res <- dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase order by mirtarbase_id limit 10")
+    Res <- dbGetQuery(dbconn(mirtarbase),
+                      "select * from mirtarbase order by mirtarbase_id limit 10")
     system.time(
         bli <- mirtarbase:::data.frame2mti(Res)
     )
@@ -59,7 +69,8 @@ test_unsorted <- function(){
 
 
     ## 50 rows:
-    Res <- dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase order by mirtarbase_id limit 50")
+    Res <- dbGetQuery(dbconn(mirtarbase),
+                      "select * from mirtarbase order by mirtarbase_id limit 50")
     system.time(
         bli <- mirtarbase:::data.frame2mti(Res)
     )
@@ -71,7 +82,8 @@ test_unsorted <- function(){
 
 
     ## 100 rows:
-    Res <- dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase order by mirtarbase_id limit 100")
+    Res <- dbGetQuery(dbconn(mirtarbase),
+                      "select * from mirtarbase order by mirtarbase_id limit 100")
     system.time(
         bli <- mirtarbase:::data.frame2mti(Res)
     )
@@ -83,7 +95,8 @@ test_unsorted <- function(){
 
 
     ## 400 rows:
-    Res <- dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase order by mirtarbase_id limit 400")
+    Res <- dbGetQuery(dbconn(mirtarbase),
+                      "select * from mirtarbase order by mirtarbase_id limit 400")
     system.time(
         bli <- mirtarbase:::data.frame2mti(Res)
     )
@@ -95,7 +108,8 @@ test_unsorted <- function(){
 
 
     ## 1000 rows:
-    Res <- dbGetQuery(dbconn(mirtarbase), "select * from mirtarbase order by mirtarbase_id limit 1000")
+    Res <- dbGetQuery(dbconn(mirtarbase),
+                      "select * from mirtarbase order by mirtarbase_id limit 1000")
     system.time(
         bli <- mirtarbase:::data.frame2mti(Res)
     )
@@ -115,9 +129,11 @@ test_unsorted <- function(){
     ##
     ##*********************************************************
     ## pre-miRNA to mature miRNA
-    Res <- premirna2matmirna(c("bla", "hsa-mir-16-1", "hsa-mir-15b", "hsa-mir-16-2"), return.type="list")
+    Res <- premirna2matmirna(c("bla", "hsa-mir-16-1", "hsa-mir-15b",
+                               "hsa-mir-16-2"), return.type="list")
     Res
-    Res <- premirna2matmirna(c("bla", "hsa-mir-16-1", "hsa-mir-15b", "hsa-mir-16-2", "hsa-mir-16-1"))
+    Res <- premirna2matmirna(c("bla", "hsa-mir-16-1", "hsa-mir-15b",
+                               "hsa-mir-16-2", "hsa-mir-16-1"))
     Res
     Res <- premirna2matmirnaAcc(c("hsa-mir-15b"))
     Res
@@ -131,7 +147,8 @@ test_unsorted <- function(){
     Res
 
     ## mature miRNA to pre-miRNA
-    Res <- matmirna2premirna(c("hsa-miR-16-5p", "hsa-miR-16-3p", "hsa-miR-16-1-3p"))
+    Res <- matmirna2premirna(c("hsa-miR-16-5p", "hsa-miR-16-3p",
+                               "hsa-miR-16-1-3p"))
     Res
     Res <- matmirna2premirnaAcc(c("hsa-miR-16-5p", "hsa-miR-16-3p"))
     Res
@@ -145,7 +162,8 @@ test_unsorted <- function(){
     Res
 
     ## pre-miRNA to mirfam and vice versa
-    Res <- premirna2mirfam(c("hsa-mir-16-1", "hsa-mir-15b", "hsa-mir-16-2", "hsa-mir-15b"))
+    Res <- premirna2mirfam(c("hsa-mir-16-1", "hsa-mir-15b", "hsa-mir-16-2",
+                             "hsa-mir-15b"))
     Res
     Res <- premirnaAcc2mirfam("MI0000070")
     Res
@@ -172,7 +190,6 @@ test_unsorted <- function(){
     head(Res)
     Res <- mirfam2matmirnaAcc("mir-15")
     head(Res)
-
 }
 
 

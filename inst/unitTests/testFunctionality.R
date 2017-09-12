@@ -1,16 +1,17 @@
 test_mtis <- function(){
     ## get all MTIs for gene BCL2 and restrict to human.
-    BCL2 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"),
-                                         SpeciesFilter("Homo sapiens", feature="gene")))
+    BCL2 <- mtis(mirtarbase,
+                 filter=list(GenenameFilter("BCL2"),
+                             SpeciesFilter("Homo sapiens", feature="gene")))
     checkEquals(unique(gene(BCL2)), "BCL2")
     checkTrue(any(matmirna(BCL2) == "hsa-miR-16-5p"))
     ## for how many miRNAs there is evidence that they target this gene?
-    length(BCL2)
+    checkEquals(length(BCL2),57)
     ## just looking at the first
-    BCL2[[1]]
+    checkTrue(is(BCL2[[1]], "MTI"))
 
     ## all of em
-    BCL2
+    checkTrue(is(BCL2, "MTIList"))
 
     ## what evidences are there for the interaction?
     table(unlist(lapply(BCL2, supportedBy)))
@@ -28,13 +29,15 @@ test_mtis <- function(){
     BCL2 <- mtis(mirtarbase, filter=GenenameFilter("BCL2"))
 
     ## Check what happens if we use return.type="data.frame"
-    Test <- mtis(mirtarbase, filter=GenenameFilter("BCL2"), return.type="data.frame")
-    checkTrue(nrow(Test) != length(unique(Test$target_gene)))
-    Test <- mtis(mirtarbase, columns=c("target_gene"), filter=GenenameFilter("BCL2"),
+    Test <- mtis(mirtarbase, filter=GenenameFilter("BCL2"),
                  return.type="data.frame")
+    checkTrue(nrow(Test) != length(unique(Test$target_gene)))
+    Test <- mtis(mirtarbase, columns=c("target_gene"),
+                 filter=GenenameFilter("BCL2"), return.type="data.frame")
     checkTrue(nrow(Test) == length(unique(Test$target_gene)))
     Test <- mtis(mirtarbase, columns=c("mirna", "target_gene"),
-                 filter=list(GenenameFilter("BCL2"), SpeciesFilter("Homo sapiens")),
+                 filter=list(GenenameFilter("BCL2"),
+                             SpeciesFilter("Homo sapiens")),
                  return.type="data.frame")
     checkEquals(nrow(Test), length(unique(Test$mirna)))
 
@@ -46,43 +49,50 @@ test_mtis <- function(){
 
     ## now we perform the same query as above, but ask for a data.frame as
     ## return type.
-    BCL2.df <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"), SpeciesFilter("Homo sapiens", feature="gene")), return.type="data.frame")
+    BCL2.df <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2"),
+                                            SpeciesFilter("Homo sapiens",
+                                                          feature="gene")),
+                    return.type="data.frame")
 
     ## the query is much faster, but:
-    nrow(BCL2.df)
-    length(BCL2)
-    ## we get almost twice as many rows: one row in the data.frame corresponds to one
-    ## publication in which a miRNA target gene interaction was detected, while each
-    ## element in the list corresponds to one MTI class with the list of Report objects
-    ## (i.e. publications) being stored in the report slot.
+    checkEquals(nrow(BCL2.df), 125)
+    checkEquals(length(BCL2), 85)
+    checkTrue(nrow(BCL2.df) > length(BCL2))
+    ## we get almost twice as many rows: one row in the data.frame corresponds
+    ## to one publication in which a miRNA target gene interaction was detected,
+    ## while each element in the list corresponds to one MTI class with the
+    ## list of Report objects (i.e. publications) being stored in the report
+    ## slot.
 
     ## Just testing what happens if we query for a non-existing pre-miRNA
-    checkException(mtis(mirtarbase, filter=list(PremirnaFilter("hsa-mir-181z"),
+    checkException(mtis(mirtarbase, filter=list(PreMirnaFilter("hsa-mir-181z"),
                                                 SpeciesFilter("Homo sapiens"))))
 
     ## Seems to be a problem with the mirbase.db version mismatch.
     ## REPORT THAT IN THE HELP AND IN THE VIGNETTE
-    Test <- mtis(mirtarbase, filter=list(PremirnaFilter("hsa-mir-181d"),
+    Test <- mtis(mirtarbase, filter=list(PreMirnaFilter("hsa-mir-181d"),
                                          SpeciesFilter("Homo sapiens")))
     premirna2matmirna("hsa-mir-181d")
-    Test <- mtis(mirtarbase, filter=list(MatmirnaFilter("hsa-miR-181d%", condition="like"),
+    Test <- mtis(mirtarbase, filter=list(MatMirnaFilter("hsa-miR-181d",
+                                                        condition="startsWith"),
                                          SpeciesFilter("Homo sapiens")))
-    unique(matmirna(Test))
+    checkEquals(unique(matmirna(Test)), c("hsa-miR-181d-5p", "hsa-miR-181d-3p"))
     ## Thus, apparently, the mature miRNA has been renamed from hsa-miR-181d to
     ## "hsa-miR-181d-5p".
 
     ## get all MTIs for a specific miRNA
-    Test <- mtis(mirtarbase, filter=list(PremirnaFilter(c("hsa-mir-223")),
+    Test <- mtis(mirtarbase, filter=list(PreMirnaFilter(c("hsa-mir-223")),
                                          SpeciesFilter("Homo sapiens")))
-    length(Test)
+    checkEquals(length(Test), 339)
     ## get the gene names along with the number of supporting evidences
-    do.call(rbind, lapply(Test, function(x){ return(c(gene=gene(x),
-                                                      report_count=reportCount(x))) }))
+    do.call(rbind, lapply(Test, function(x){
+        return(c(gene=gene(x),
+                 report_count=reportCount(x))) }))
 
     ## get all MTIs for a miRNA family.
     MTIs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
                                          SpeciesFilter("Homo sapiens")))
-    length(MTIs)
+    checkEquals(length(MTIs), 3897)
     ## next we might want to ask if there are genes targeted by more than one miRNA
     ## of this family.
     head(sort(table(gene(MTIs)), decreasing=TRUE))
@@ -172,11 +182,8 @@ test_mat2fam <- function(){
 ## test some stuff with MTIList
 ##*****************
 test_mtilist <- function(x){
-    detach("package:mirtarbase", unload=TRUE)
-    library(mirtarbase)
-
     ## get all MTIs for a miRNA family.
-    MTIs <- mtis(mirtarbase, filter=list(PremirnaFilter("hsa-mir-223"),
+    MTIs <- mtis(mirtarbase, filter=list(PreMirnaFilter("hsa-mir-223"),
                                          SpeciesFilter("Homo sapiens")))
     checkTrue(is(MTIs, "MTIList"))
 
@@ -211,21 +218,22 @@ test_mtilist <- function(x){
 
     ## get an MTI from the database we're looking here for an interaction
     ## between the gene BCL2L11 and miRNAs from the mir-17 family.
-    BCL2L11 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2L11"), MirfamFilter("mir-17")))
+    BCL2L11 <- mtis(mirtarbase, filter=list(GenenameFilter("BCL2L11"),
+                                            MirfamFilter("mir-17")))
     BCL2L11 <- BCL2L11[[1]]
     BCL2L11
 
     ## what's the mature miRNA?
-    matmirna(BCL2L11)
+    checkEquals(matmirna(BCL2L11), "hsa-miR-17-5p")
     ## what's the precursor of this miRNA
-    premirna(BCL2L11)
+    checkEquals(premirna(BCL2L11), "hsa-mir-17")
 
     ## the gene name and the Entrezgene ID?
-    gene(BCL2L11)
-    entrezid(BCL2L11)
+    checkEquals(gene(BCL2L11), "BCL2L11")
+    checkEquals(entrezid(BCL2L11), 10018)
 
     ## on how many reports (publications) does this base?
-    reportCount(BCL2L11)
+    checkEquals(reportCount(BCL2L11), 8)
 
     ## what evidence/support types?
     supportedBy(BCL2L11)
@@ -244,11 +252,11 @@ test_mtilist <- function(x){
 ##******************************************************
 ## for comparison...
 test_mtisBy <- function(){
-    Filters <- list(PremirnaFilter(c("hsa-mir-15b", "hsa-mir-16-2", "hsa-mir-17")),
+    Filters <- list(PreMirnaFilter(c("hsa-mir-15b", "hsa-mir-16-2", "hsa-mir-17")),
                     SpeciesFilter("Homo sapiens"),
                     GenenameFilter(c("BCL2", "BCL2L11", "MCL1")))
     Test <- mtis(mirtarbase, filter=Filters, return.type="MTI")
-    length(Test)
+    checkEquals(length(Test), 6)
     Test
 
     ## MTIs by gene
@@ -274,10 +282,10 @@ test_mtisBy <- function(){
     TestBy
 
     ## works. what if we get a little more: can we run by premirna on more?
-    TestBy <- mtisBy(mirtarbase, by="premirna", filter=list(MirfamFilter(c("mir-17", "mir-15")),
-                                                            SpeciesFilter("Homo sapiens")))
+    TestBy <- mtisBy(mirtarbase, by="premirna",
+                     filter=list(MirfamFilter(c("mir-17", "mir-15")),
+                                 SpeciesFilter("Homo sapiens")))
     TestBy
-
 }
 
 

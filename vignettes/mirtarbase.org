@@ -15,10 +15,10 @@
 ---
 title: "mirtarbase: a database of validated miRNA target gene interactions"
 graphics: yes
+author:
+- name: Johannes Rainer
 output:
   BiocStyle::html_document:
-    toc_depth: 2
-  BiocStyle::pdf_document:
     toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{mirtarbase: a database of validated miRNA target gene interactions}
@@ -39,12 +39,6 @@ references:
 #+END_EXPORT
 
 # **Package**: `r BiocStyle::Biocpkg("mirtarbase")`<br />
-
-#+BEGIN_EXPORT html
-**Authors**: `r packageDescription("mirtarbase")$Author`<br />
-**Modified**: 22 February, 2016<br />
-**Compiled**: `r date()`
-#+END_EXPORT
 
 #+BEGIN_SRC R :ravel echo=FALSE, results='asis'
   BiocStyle::markdown()
@@ -83,7 +77,7 @@ automatically loaded upon library startup and bound to the environment variable
 miRTarBase. In addition, a shortcut =mirtarbase= is automatically generated and
 linked to the (most recent) release available in the package.
 
-#+BEGIN_SRC R :ravel warning=FALSE
+#+BEGIN_SRC R :ravel warning=FALSE, message = FALSE
   library(mirtarbase)
 
 #+END_SRC
@@ -110,27 +104,28 @@ attributes/columns).
 Before we start with some usage scenarios for the package it is important to
 understand the mechanism to fetch specific values from the database, i.e. how
 the results can be filtered. The package uses the same filtering system than the
-=ensembldb= Bioconductor package and extends it by some additional filters.
+=ensembldb= Bioconductor package and extends it by some additional filters
+(filters are partially imported from the =mirhostgenes= package).
 The following filter classes are used by the package (in alphabetical order):
 
-+ =EntrezidFilter=: filter the results based on the target genes' NCBI
++ =EntrezFilter=: filter the results based on the target genes' NCBI
   Entrezgene identifiers.
 + =ExperimentFilter=: restrict the results to specific experiments (use
   =listExperiments(mirtarbase)= to get a list of all experiments).
 + =GenenameFilter=: filter the results based on the target genes' names
   (symbols).
-+ =MatmirnaFilter=: search for MTIs for specific mature miRNA names
++ =MatMirnaFilter=: search for MTIs for specific mature miRNA names
   (e.g. /hsa-miR-15b-5p/).
-+ =MarmirnaidFilter=: search for MTIs for specific mature miRNAs identified by
++ =MarMirnaIdFilter=: search for MTIs for specific mature miRNAs identified by
   their mirbase accession number.
 + =MirfamFilter=: filter the results based on miRNAs of specific miRNA families.
-+ =MirfamidFilter=: filter the results based on miRNAs of specific miRNA
++ =MirfamIdFilter=: filter the results based on miRNAs of specific miRNA
   families identified by their mirbase accession number.
-+ =MirtarbaseidFilter=; filter the results based on the ID of the miRTarBase
++ =MirtarbaseIdFilter=; filter the results based on the ID of the miRTarBase
   database.
-+ =PremirnaFilter=: filter the results for MTIs of mature miRNAs derived from
++ =PreMirnaFilter=: filter the results for MTIs of mature miRNAs derived from
   the specified pre-miRNA(s).
-+ =PremirnaidFilter=: filter the results for MTIs of mature miRNAs derived from
++ =PreMirnaidFilter=: filter the results for MTIs of mature miRNAs derived from
   the specified pre-miRNA(s) identified by their mirbase accession number.
 + =PublicationFilter=: filter the results based on the publication (identified
   by their Pubmed IDs) in which the MTI was described.
@@ -144,9 +139,9 @@ The following filter classes are used by the package (in alphabetical order):
 These filters can be used individually or can be combined to generate more
 specific queries. Furthermore, the parameter =condition= allows some more
 flexibility to choose which entries should be fetched. =condition= can take the
-following values: ===, =!==, =like=, =not like= with the latter two allowing
-partial matching. In addition, each filter can take a single or multiple values
-(see examples in the next section).
+following values: ==, !=, contains, startsWith, endsWith with the latter 3
+allowing partial matching. In addition, each filter can take a single or
+multiple values (see examples in the next section).
 
 ** Get miRNA-target gene interactions for a specific gene
 
@@ -264,7 +259,7 @@ condition and a pattern for the gene name.
   ## Get all miRNA-target gene interactions betwee mature miRNAs from the
   ## mir-15 family and genes starting with BCL2
   BCLs <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
-                                       GenenameFilter("BCL2%", condition="like"),
+                                       GenenameFilter("BCL2", condition="startsWith"),
                                        SpeciesFilter("Homo sapiens"))
               )
   BCLs
@@ -281,7 +276,7 @@ database by specifying the columns that should be returned.
 
 #+BEGIN_SRC R
   onlyGeneNames <- mtis(mirtarbase, filter=list(MirfamFilter("mir-15"),
-						GenenameFilter("BCL2%", condition="like"),
+						GenenameFilter("BCL2", condition="startsWith"),
 						SpeciesFilter("Homo sapiens")),
 			columns=c("mirna", "target_gene"), return.type="data.frame")
   head(onlyGeneNames)

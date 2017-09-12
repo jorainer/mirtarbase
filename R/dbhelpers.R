@@ -122,6 +122,7 @@ MirtarbaseDb <- function(x){
                      order.type="asc", match.case=FALSE, force=FALSE){
     Q <- .buildQuery(x, columns=columns, filter=filter, order.by=order.by,
                      order.type=order.type, match.case=match.case, force=force)
+    cat("Query: ", Q, "\n")
     return(dbGetQuery(dbconn(x), Q))
 }
 
