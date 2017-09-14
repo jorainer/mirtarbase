@@ -1,7 +1,7 @@
 Package: mirtarbase
 Type: Package
 Title: mirtarbase: a database of validated miRNA target gene interactions
-Version: 0.99.4
+Version: 0.99.5
 Author: J. Rainer
 Maintainer: Johannes Rainer <johannes.rainer@eurac.edu>
 URL: https://github.com/jotsetung/mirtarbase

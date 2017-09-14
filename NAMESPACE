@@ -10,12 +10,12 @@ importFrom(parallel, mclapply)
 importClassesFrom(ensembldb, BasicFilter, GenenameFilter, EntrezidFilter)  ## filters
 importFrom(ensembldb, GenenameFilter, EntrezidFilter)
 importMethodsFrom(ensembldb, where, listColumns,
-                  listTables, condition, value, "value<-", "condition<-")
+                  listTables, condition)
 importClassesFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
                   MatmirnaidFilter, MirfamFilter, MirfamidFilter)  ## filters
 importFrom(mirhostgenes, PremirnaFilter, PremirnaidFilter, MatmirnaFilter,
            MatmirnaidFilter, MirfamFilter, MirfamidFilter)
-importMethodsFrom(mirhostgenes, where, column)
+importMethodsFrom(mirhostgenes, where, column, value, "value<-", "condition<-")
 importFrom(DBI, dbDriver)
 
 export("MTIReport")
